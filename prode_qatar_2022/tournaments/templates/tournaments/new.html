@@ -1,0 +1,15 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>New {{title}}</title>
+{% endblock %}
+
+{% block content %}
+	<form method="post">
+		<table>
+			{{ form.as_p }}
+		</table>
+		{% csrf_token %}
+		<button type="submit" class="btn btn-dark">Create</button>
+	</form>
+{% endblock %}
