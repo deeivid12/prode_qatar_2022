@@ -1,10 +1,6 @@
 from django.shortcuts import render, redirect
-from django.forms import modelform_factory
-from tournaments.models import Tournament, Team, Game
-
-TournamentForm = modelform_factory(Tournament, exclude=[])
-TeamForm = modelform_factory(Team, exclude=[])
-GameForm = modelform_factory(Game, exclude=["home_goals", "away_goals"])
+from tournaments.models import Game
+from tournaments.forms import TeamForm, TournamentForm, GameForm
 
 
 def new_tournament(request):
@@ -41,3 +37,13 @@ def new_game(request):
 		form = GameForm()
 		data = {"form": form, "title": "Game"}
 	return render(request, "tournaments/new.html", data)
+
+
+def get_games_list(request):
+	games = Game.objects.all()
+	data = {"games": games, "title": "Todos los partidos"}
+	for game in games:
+		print(game)
+		print(game.home_team)
+	return render(request, "tournaments/games_list.html",
+            data)

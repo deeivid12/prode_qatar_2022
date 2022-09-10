@@ -1,0 +1,16 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+	<ul class="list-group">
+		{% for game in games %}
+		<li class="list-group-item list-group-item-dark text-center">
+			{{game.home_team}} vs {{game.away_team}}
+		</li>
+		</br>
+		{% endfor %}
+	</ul>
+{% endblock %}
