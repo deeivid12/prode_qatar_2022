@@ -1,0 +1,32 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+	<ul class="list-group">
+		<form method="post">
+		{% for form, pronostic in forms_pronostics %}
+			
+				{% csrf_token %}
+				{{form.game_id}}
+				<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
+				<li class="list-group-item list-group-item-dark text-center">
+					{{pronostic.game}}
+				</li>
+				<li class="list-group-item list-group-item-dark text-center">
+					Result: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}
+				</li>
+				<li class="list-group-item list-group-item-dark text-center">
+					{{form.home_goals}} - {{form.away_goals}}
+			</li>
+			
+		</br>
+		{% endfor %}
+		<button type="submit" class="btn btn-dark">Save</button>
+	</form>
+		</br>
+		
+	</ul>
+{% endblock %}
