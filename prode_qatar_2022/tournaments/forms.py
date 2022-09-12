@@ -1,5 +1,5 @@
 from django import forms
-from tournaments.models import Team, Tournament, Game
+from tournaments.models import Team, Tournament, Game, Pronostic
 
 class TeamForm(forms.ModelForm):
     class Meta:
@@ -28,4 +28,14 @@ class GameForm(forms.ModelForm):
 			'home_team': forms.TextInput(attrs={'class': 'form-control'}),
 			'away_team': forms.TextInput(attrs={'class': 'form-control'}),
 			'tournament': forms.Select(attrs={'class': 'form-control'}),
+		}
+
+
+class PronosticForm(forms.ModelForm):
+	class Meta:
+		model = Pronostic
+		fields = '__all__'
+		widgets = {
+			'home_goals': forms.NumberInput(attrs={'class': 'form-control'}),
+			'away_goals': forms.NumberInput(attrs={'class': 'form-control'}),
 		}
