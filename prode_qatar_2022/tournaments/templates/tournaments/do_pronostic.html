@@ -5,28 +5,55 @@
 {% endblock %}
 
 {% block content %}
-	<ul class="list-group">
 		<form method="post">
 		{% for form, pronostic in forms_pronostics %}
-			
-				{% csrf_token %}
-				{{form.game_id}}
-				<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
-				<li class="list-group-item list-group-item-dark text-center">
-					{{pronostic.game}}
-				</li>
-				<li class="list-group-item list-group-item-dark text-center">
-					Result: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}
-				</li>
-				<li class="list-group-item list-group-item-dark text-center">
-					{{form.home_goals}} - {{form.away_goals}}
+			{% csrf_token %}
+			{{form.game_id}}
+			<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
+			<div class="row">
+				<div class="col">
+					<table class="table table-dark table-hover">
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Local</th>
+								<th>L</th>
+								<th>-</th>
+								<th>V</th>
+								<th>Visitante</th>
+								<th>Resultado</th>
+								<th>Puntos</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>20/11/2022</td>
+								<td>{{pronostic.game.home_team}}</td>
+								<td>{{form.home_goals}}</td>
+								<td>-</td>
+								<td>{{form.away_goals}}</td>
+								<td>{{pronostic.game.away_team}}</td>
+								<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
+								<td>{{pronostic.points}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- <li class="list-group-item list-group-item-dark text-center">
+				{{pronostic.game}}
 			</li>
+			<li class="list-group-item list-group-item-dark text-center">
+				Result: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}
+			</li>
+			<li class="list-group-item list-group-item-dark text-center">
+				{{form.home_goals}} - {{form.away_goals}}
+			</li> -->
 			
 		</br>
 		{% endfor %}
 		<button type="submit" class="btn btn-dark">Save</button>
 	</form>
 		</br>
-		
-	</ul>
+
 {% endblock %}
