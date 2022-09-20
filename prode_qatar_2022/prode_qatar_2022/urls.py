@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from tournaments.views import new_tournament, new_team, new_game, get_games_list, do_pronostic
+from tournaments.views import new_tournament, new_team, new_game, get_games_list, do_pronostic, check_pronostics, get_points
 
 urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
@@ -24,4 +24,6 @@ urlpatterns = [
     path('new_game', new_game, name="new_game"),
     path('do_pronostic', do_pronostic, name="do_pronostic"),
     path('all_games', get_games_list, name="all_games"),
+    path('check_pronostics', check_pronostics, name="check_pronostics"),
+    path('get_points', get_points, name="get_points")
 ]

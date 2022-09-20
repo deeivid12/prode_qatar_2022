@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from tournaments.models import Game, Pronostic
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
-from commons.utils import querydict_to_dict
+from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 
 
 def new_tournament(request):
@@ -78,3 +78,27 @@ def do_pronostic(request):
 		data = {"forms_pronostics": zip(forms, pronostics), "title": "Realizar Pronosticos"}
 		return render(request, "tournaments/do_pronostic.html",
 				data)
+
+def check_pronostics(request):
+    # only pronostics with 'checked' in False
+	pronostics = Pronostic.objects.filter(checked=False)
+	for pronostic in pronostics:
+		game = Game.objects.filter(id=pronostic.game.id).first()
+		if is_correct_same_result(pronostic, game):
+			points = POINTS_CORRECT_SAME_RESULT
+		elif is_correct_different_result(pronostic, game):
+			points = POINTS_CORRECT_DIFF_RESULT
+		else:
+			points = POINTS_INCORRECT_RESULT
+		pronostic.checked = True
+		pronostic.points = points
+		pronostic.save()
+	return redirect('all_games')
+
+
+def get_points(request):
+	# it'll work just for now, to test everything is good
+	pronostics = Pronostic.objects.filter(checked=True)
+	points = [pronostic.points for pronostic in pronostics]
+	print(sum(points))
+	return redirect('all_games')
