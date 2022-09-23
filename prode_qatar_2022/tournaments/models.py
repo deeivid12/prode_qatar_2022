@@ -48,8 +48,12 @@ class Pronostic(models.Model):
 class Room(models.Model):
 	"""This model represents the different "room" tournaments the users can create in order to play with friends.
 	"""
+	name = models.CharField(max_length=100)
 	tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
 	users = models.ManyToManyField(User, related_name="tournaments_rooms")
 	grand_prize = models.CharField(max_length=100)
 	private = models.BooleanField(default=True)
+
+	def __str__(self):
+		return f"{self.name} - {self.tournament}"
 
