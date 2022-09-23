@@ -26,7 +26,10 @@
 				<a class="nav-link" href="{% url 'all_games' %}">Partidos</a>
 			  </li>
 			  <li class="nav-item">
-				<a class="nav-link" href="{% url 'do_pronostic' %}">Mis Predicciones</a>
+				<a class="nav-link" href="{% url 'all_rooms' %}">Mis Torneos</a>
+			  </li>
+			  <li class="nav-item">
+				<a class="nav-link" href="{% url 'check_pronostics' %}">Check Predicciones</a>
 			  </li>
 			  <li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Mi Cuenta</a>
@@ -40,7 +43,7 @@
 		</div>
 	</nav>
 	</br>
-	<div class="container">
+	<div class="container text-center">
 		{% block content %}
 
 		{% endblock %}

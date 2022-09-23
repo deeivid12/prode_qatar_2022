@@ -1,0 +1,16 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+	<ul class="list-group">
+		{% for pronostic in pronostics_ranking %}
+		<li class="list-group-item list-group-item-dark text-center">
+			{{pronostic}}
+		</li>
+		</br>
+		{% endfor %}
+	</ul>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+	<ul class="list-group">
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'do_pronostic' room.id %}">Mis Predicciones</a>
+		</li>
+		</br>
+	</ul>
+{% endblock %}

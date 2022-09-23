@@ -34,7 +34,11 @@
 								<td>{{form.away_goals}}</td>
 								<td>{{pronostic.game.away_team}}</td>
 								<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
+								{% if pronostic.points >= 0 %}
 								<td>{{pronostic.points}}</td>
+								{% else %}
+								<td>Pendiente</td>
+								{% endif %}
 							</tr>
 						</tbody>
 					</table>
