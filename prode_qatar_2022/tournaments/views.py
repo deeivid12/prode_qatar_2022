@@ -3,7 +3,7 @@ from django.db.models import Count, Sum
 from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
 from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
-
+from django.contrib.auth.models import User
 
 def new_tournament(request):
 	if request.method == "POST":
@@ -114,12 +114,14 @@ def get_points(request):
 
 def get_ranking_by_room(request, room_id):
 	# TBD: need to validate room_id corresponds to rooms the user has
-	pronostics_ranking = (Pronostic.objects
-	.values('user_id')
-	.filter(checked=True, room_id=room_id)
-	.annotate(total=Sum('points'))
-	.order_by('total'))
-	data = {"pronostics_ranking": pronostics_ranking}
+	pronostics_ranking = Pronostic.objects.values('user_id').filter(checked=True, room_id=room_id).annotate(total=Sum('points')).order_by('-total')
+	ranking = []
+	for idx, pronostic in enumerate(pronostics_ranking):
+		print(pronostic)
+		username = User.objects.filter(id=pronostic.get('user_id')).first().username
+		position = idx+1
+		ranking.append({'position': position, 'username': username, 'total':pronostic.get('total')})
+	data = {"pronostics_ranking": ranking}
 	return render(request, "tournaments/pronostics_ranking.html", data)
 
 
