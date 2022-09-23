@@ -32,19 +32,6 @@ class Game(models.Model):
 		return f"{self.home_team} vs {self.away_team} - {self.tournament}"
 
 
-class Pronostic(models.Model):
-	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	home_goals = models.PositiveSmallIntegerField(default=0)
-	away_goals = models.PositiveSmallIntegerField(default=0)
-	checked = models.BooleanField(default=False)
-	info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
-	points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
-
-	def __str__(self):
-		return f"{self.game} ({self.home_goals}-{self.away_goals})"
-
-
 class Room(models.Model):
 	"""This model represents the different "room" tournaments the users can create in order to play with friends.
 	"""
@@ -56,4 +43,20 @@ class Room(models.Model):
 
 	def __str__(self):
 		return f"{self.name} - {self.tournament}"
+
+class Pronostic(models.Model):
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	room = models.ForeignKey(Room, on_delete=models.CASCADE)
+	home_goals = models.PositiveSmallIntegerField(default=0)
+	away_goals = models.PositiveSmallIntegerField(default=0)
+	checked = models.BooleanField(default=False)
+	info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
+	points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
+
+	def __str__(self):
+		return f"{self.game} ({self.home_goals}-{self.away_goals})"
+
+
+
 
