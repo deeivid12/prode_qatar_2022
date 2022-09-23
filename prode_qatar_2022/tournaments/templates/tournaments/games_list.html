@@ -5,12 +5,16 @@
 {% endblock %}
 
 {% block content %}
-	<ul class="list-group">
-		{% for game in games %}
-		<li class="list-group-item list-group-item-dark text-center">
-			{{game.home_team}} vs {{game.away_team}}
-		</li>
-		</br>
-		{% endfor %}
-	</ul>
+<div class="row">
+	<div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+		<ul class="list-group">
+			{% for game in games %}
+			<li class="list-group-item list-group-item-dark text-center">
+				{{game.home_team}} vs {{game.away_team}}
+			</li>
+			</br>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
 {% endblock %}

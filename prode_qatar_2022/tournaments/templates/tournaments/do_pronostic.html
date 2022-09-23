@@ -5,59 +5,49 @@
 {% endblock %}
 
 {% block content %}
-		<form method="post">
-		{% for form, pronostic in forms_pronostics %}
-			{% csrf_token %}
-			{{form.game_id}}
-			<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
-			<div class="row">
-				<div class="col">
-					<table class="table table-dark table-hover">
-						<thead>
-							<tr>
-								<th>Fecha</th>
-								<th>Local</th>
-								<th>L</th>
-								<th>-</th>
-								<th>V</th>
-								<th>Visitante</th>
-								<th>Resultado</th>
-								<th>Puntos</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>20/11/2022</td>
-								<td>{{pronostic.game.home_team}}</td>
-								<td>{{form.home_goals}}</td>
-								<td>-</td>
-								<td>{{form.away_goals}}</td>
-								<td>{{pronostic.game.away_team}}</td>
-								<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
-								{% if pronostic.points >= 0 %}
-								<td>{{pronostic.points}}</td>
-								{% else %}
-								<td>Pendiente</td>
-								{% endif %}
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-			<!-- <li class="list-group-item list-group-item-dark text-center">
-				{{pronostic.game}}
-			</li>
-			<li class="list-group-item list-group-item-dark text-center">
-				Result: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}
-			</li>
-			<li class="list-group-item list-group-item-dark text-center">
-				{{form.home_goals}} - {{form.away_goals}}
-			</li> -->
-			
-		</br>
-		{% endfor %}
-		<button type="submit" class="btn btn-dark">Save</button>
-	</form>
-		</br>
-
+		
+	<div class="row">
+		<div class="col col-md-6 offset-md-3">
+			<form method="post">
+				<table class="table table-dark table-hover">
+					<thead>
+						<tr>
+							<th>Fecha</th>
+							<th>Local</th>
+							<th>L</th>
+							<th>-</th>
+							<th>V</th>
+							<th>Visitante</th>
+							<th>Resultado</th>
+							<th>Puntos</th>
+						</tr>
+					</thead>
+					
+					{% for form, pronostic in forms_pronostics %}
+						{% csrf_token %}
+						<!-- {{form.game_id}} -->
+						<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
+					<tbody>
+						<tr>
+							<td>20/11/2022</td>
+							<td>{{pronostic.game.home_team}}</td>
+							<td>{{form.home_goals}}</td>
+							<td>-</td>
+							<td>{{form.away_goals}}</td>
+							<td>{{pronostic.game.away_team}}</td>
+							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
+							{% if pronostic.points >= 0 %}
+							<td>{{pronostic.points}}</td>
+							{% else %}
+							<td>Pendiente</td>
+							{% endif %}
+						</tr>
+					</tbody>
+					{% endfor %}
+				</table>
+			</form>
+			</br>
+			<button type="submit" class="btn btn-dark">Save</button>
+		</div>
+	</div>
 {% endblock %}

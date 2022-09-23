@@ -5,12 +5,27 @@
 {% endblock %}
 
 {% block content %}
-	<ul class="list-group">
-		{% for pronostic in pronostics_ranking %}
-		<li class="list-group-item list-group-item-dark text-center">
-			{{pronostic}}
-		</li>
-		</br>
-		{% endfor %}
-	</ul>
+	<div class="row">
+		<div class="col col-md-6 offset-md-3">
+			<table class="table table-dark table-hover">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Usuario</th>
+						<th>Puntos</th>
+					</tr>
+				</thead>
+			{% for pronostic in pronostics_ranking %}
+				<tbody>
+					<tr>
+						<td>{{pronostic.position}}</td>
+						<td>{{pronostic.username}}</td>
+						<td>{{pronostic.total}}</td>
+					</tr>
+				</tbody>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+		
 {% endblock %}

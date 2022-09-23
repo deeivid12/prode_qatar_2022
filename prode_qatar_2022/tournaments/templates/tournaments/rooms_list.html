@@ -5,12 +5,19 @@
 {% endblock %}
 
 {% block content %}
-	<ul class="list-group">
-		{% for room in rooms %}
-		<li class="list-group-item list-group-item-dark text-center">
-			<a href="{% url 'get_room' room.id %}">{{room}}</a>
-		</li>
+	{% for room in rooms %}
+		<div class="row">
+			<div class="col col-md-6 offset-md-3 ">
+				<div class="card">
+					<h5 class="card-header">{{room.name}}</h5>
+					<div class="card-body">
+					<h5 class="card-title">{{room.tournament}}</h5>
+					<p class="card-text">Premio: {{room.grand_prize}}</p>
+					<a href="{% url 'get_room' room.id %}" class="btn btn-dark">Ingresar</a>
+					</div>
+				</div>
+			</div>
+		</div>
 		</br>
-		{% endfor %}
-	</ul>
+	{% endfor %}
 {% endblock %}
