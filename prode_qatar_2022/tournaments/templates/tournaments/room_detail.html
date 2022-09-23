@@ -9,6 +9,15 @@
 		<li class="list-group-item list-group-item-dark text-center">
 			<a href="{% url 'do_pronostic' room.id %}">Mis Predicciones</a>
 		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'ranking' room.id %}">Ranking</a>
+		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="#">Mis Puntos</a>
+		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'all_games' %}">Resultados Partidos</a>
+		</li>
 		</br>
 	</ul>
 {% endblock %}
