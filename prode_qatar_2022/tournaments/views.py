@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
-from tournaments.models import Game, Pronostic
+from django.shortcuts import render, redirect, reverse
+from django.db.models import Count, Sum
+from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
 from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 
@@ -51,13 +52,14 @@ def do_pronostic(request, room_id):
 	# need to be authenticated, otherwise it won't work
 	# the idea is having a list of tournaments_ids...
 	current_user = request.user
-	tournament_id = current_user.tournaments_rooms.filter(id=room_id).first().tournament_id
+	room = current_user.tournaments_rooms.filter(id=room_id).first()
+	tournament_id = room.tournament_id
 	if request.method == "POST":
 		num_games = Game.objects.filter(tournament_id=tournament_id).count()
 		form_data = querydict_to_dict(request.POST)
 		for num in range(num_games):
-			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "user":current_user}
-			pronostic = Pronostic.objects.filter(game_id=pronostic_data.get("game"), user_id=current_user.id).first()
+			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "user":current_user, "room":room}
+			pronostic = Pronostic.objects.filter(game_id=pronostic_data.get("game"), user_id=current_user.id, room_id=room_id).first()
 			if pronostic and pronostic.checked:
 				break
 			if pronostic:
@@ -70,14 +72,14 @@ def do_pronostic(request, room_id):
 					form.save()
 				else:
 					print(form.errors.as_data())
-		return redirect("do_pronostic")
+		return redirect("do_pronostic", room_id=room_id)
 	else:
 		games = Game.objects.filter(tournament_id=tournament_id)
 		pronostics = []
 		for game in games:
-			pronostic = Pronostic.objects.filter(game_id=game.id, user_id=current_user.id).first()
+			pronostic = Pronostic.objects.filter(game_id=game.id, user_id=current_user.id, room_id=room_id).first()
 			if not pronostic:
-				pronostic = Pronostic(game=game, user=current_user)
+				pronostic = Pronostic(game=game, user=current_user, room=room)
 			pronostics.append(pronostic)
 		forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
 		# forms and games have the same size
@@ -87,11 +89,9 @@ def do_pronostic(request, room_id):
 
 def check_pronostics(request):
     # only pronostics with 'checked' in False
-	current_user = request.user
-	tournament_id = current_user.tournaments_rooms.first().tournament_id
-	pronostics = Pronostic.objects.filter(checked=False, user_id=current_user.id)
+	pronostics = Pronostic.objects.filter(checked=False)
 	for pronostic in pronostics:
-		game = Game.objects.filter(id=pronostic.game.id, tournament_id=tournament_id).first()
+		game = Game.objects.filter(id=pronostic.game.id).first()
 		if is_correct_same_result(pronostic, game):
 			points = POINTS_CORRECT_SAME_RESULT
 		elif is_correct_different_result(pronostic, game):
@@ -110,6 +110,17 @@ def get_points(request):
 	points = [pronostic.points for pronostic in pronostics]
 	print(sum(points))
 	return redirect('all_games')
+
+
+def get_ranking_by_room(request, room_id):
+	# TBD: need to validate room_id corresponds to rooms the user has
+	pronostics_ranking = (Pronostic.objects
+	.values('user_id')
+	.filter(checked=True, room_id=room_id)
+	.annotate(total=Sum('points'))
+	.order_by('total'))
+	data = {"pronostics_ranking": pronostics_ranking}
+	return render(request, "tournaments/pronostics_ranking.html", data)
 
 
 def get_rooms_list_by_user(request):
