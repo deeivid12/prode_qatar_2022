@@ -13,6 +13,7 @@ def login_user(request):
 			login(request, user)
 			return redirect('all_games')
 		else:
+			messages.warning(request, "Usuario y/o password incorrecto. Por favor intente nuevamente.")
 			return redirect('login')
 	return render(request, 'auth/login.html', {})
 

@@ -47,13 +47,19 @@ def get_games_list(request):
             data)
 
 
-def do_pronostic(request):
+def do_pronostic(request, room_id):
+	# need to be authenticated, otherwise it won't work
+	# the idea is having a list of tournaments_ids...
+	current_user = request.user
+	tournament_id = current_user.tournaments_rooms.filter(id=room_id).first().tournament_id
 	if request.method == "POST":
-		num_games = Game.objects.all().count()
+		num_games = Game.objects.filter(tournament_id=tournament_id).count()
 		form_data = querydict_to_dict(request.POST)
 		for num in range(num_games):
-			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num])}
-			pronostic = Pronostic.objects.filter(game_id=pronostic_data.get("game")).first()
+			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "user":current_user}
+			pronostic = Pronostic.objects.filter(game_id=pronostic_data.get("game"), user_id=current_user.id).first()
+			if pronostic and pronostic.checked:
+				break
 			if pronostic:
 				pronostic.home_goals = pronostic_data.get("home_goals")
 				pronostic.away_goals = pronostic_data.get("away_goals")
@@ -66,12 +72,12 @@ def do_pronostic(request):
 					print(form.errors.as_data())
 		return redirect("do_pronostic")
 	else:
-		games = Game.objects.all()
+		games = Game.objects.filter(tournament_id=tournament_id)
 		pronostics = []
 		for game in games:
-			pronostic = Pronostic.objects.filter(game_id=game.id).first()
+			pronostic = Pronostic.objects.filter(game_id=game.id, user_id=current_user.id).first()
 			if not pronostic:
-				pronostic = Pronostic(game=game)
+				pronostic = Pronostic(game=game, user=current_user)
 			pronostics.append(pronostic)
 		forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
 		# forms and games have the same size
@@ -81,9 +87,11 @@ def do_pronostic(request):
 
 def check_pronostics(request):
     # only pronostics with 'checked' in False
-	pronostics = Pronostic.objects.filter(checked=False)
+	current_user = request.user
+	tournament_id = current_user.tournaments_rooms.first().tournament_id
+	pronostics = Pronostic.objects.filter(checked=False, user_id=current_user.id)
 	for pronostic in pronostics:
-		game = Game.objects.filter(id=pronostic.game.id).first()
+		game = Game.objects.filter(id=pronostic.game.id, tournament_id=tournament_id).first()
 		if is_correct_same_result(pronostic, game):
 			points = POINTS_CORRECT_SAME_RESULT
 		elif is_correct_different_result(pronostic, game):
@@ -102,3 +110,17 @@ def get_points(request):
 	points = [pronostic.points for pronostic in pronostics]
 	print(sum(points))
 	return redirect('all_games')
+
+
+def get_rooms_list_by_user(request):
+	current_user = request.user
+	rooms = current_user.tournaments_rooms.all()
+	data = {"rooms": rooms}
+	return render(request, "tournaments/rooms_list.html", data)
+
+
+def get_room(request, id):
+	current_user = request.user
+	room = current_user.tournaments_rooms.filter(id=id).first()
+	data = {"room": room}
+	return render(request, "tournaments/room_detail.html", data)
