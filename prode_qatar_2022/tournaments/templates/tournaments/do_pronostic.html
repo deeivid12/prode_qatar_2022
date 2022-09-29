@@ -15,7 +15,9 @@
 							<th>Fecha</th>
 							<th>Local</th>
 							<th>L</th>
+							<th></th>
 							<th>-</th>
+							<th></th>
 							<th>V</th>
 							<th>Visitante</th>
 							<th>Resultado</th>
@@ -32,7 +34,9 @@
 							<td>20/11/2022</td>
 							<td>{{pronostic.game.home_team}}</td>
 							<td>{{form.home_goals}}</td>
+							<td><input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value={{pronostic.game.home_team.id}} {% if pronostic.penalties_win == pronostic.game.home_team.id %} checked {% endif %}></input></td>
 							<td>-</td>
+							<td><input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value={{pronostic.game.away_team.id}} {% if pronostic.penalties_win == pronostic.game.away_team.id %} checked {% endif %}></input></td>
 							<td>{{form.away_goals}}</td>
 							<td>{{pronostic.game.away_team}}</td>
 							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
