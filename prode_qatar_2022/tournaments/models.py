@@ -27,6 +27,8 @@ class Game(models.Model):
 	home_goals = models.PositiveSmallIntegerField(default=0)
 	away_goals = models.PositiveSmallIntegerField(default=0)
 	tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+	is_knockout = models.BooleanField(default=False)
+	penalties_win = models.PositiveSmallIntegerField(default=0)
 
 	def __str__(self):
 		return f"{self.home_team} vs {self.away_team} - {self.tournament}"
@@ -50,6 +52,7 @@ class Pronostic(models.Model):
 	room = models.ForeignKey(Room, on_delete=models.CASCADE)
 	home_goals = models.PositiveSmallIntegerField(default=0)
 	away_goals = models.PositiveSmallIntegerField(default=0)
+	penalties_win = models.PositiveSmallIntegerField(default=0)
 	checked = models.BooleanField(default=False)
 	info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
 	points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
