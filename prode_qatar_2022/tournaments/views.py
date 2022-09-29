@@ -4,6 +4,7 @@ from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
 from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 def new_tournament(request):
 	if request.method == "POST":
@@ -113,11 +114,13 @@ def get_points(request):
 
 
 def get_ranking_by_room(request, room_id):
-	# TBD: need to validate room_id corresponds to rooms the user has
+	current_user = request.user
+	user_rooms_ids = User.objects.filter(id=current_user.id).first().tournaments_rooms.values_list('id', flat=True)
+	if room_id not in user_rooms_ids:
+		return JsonResponse({"error_404": "No corresponde el room con el usuario"})
 	pronostics_ranking = Pronostic.objects.values('user_id').filter(checked=True, room_id=room_id).annotate(total=Sum('points')).order_by('-total')
 	ranking = []
 	for idx, pronostic in enumerate(pronostics_ranking):
-		print(pronostic)
 		username = User.objects.filter(id=pronostic.get('user_id')).first().username
 		position = idx+1
 		ranking.append({'position': position, 'username': username, 'total':pronostic.get('total')})
