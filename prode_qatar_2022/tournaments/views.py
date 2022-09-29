@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, reverse
 from django.db.models import Count, Sum
 from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
-from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
+from commons.utils import querydict_to_dict, get_do_pronostic_data, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -57,15 +57,17 @@ def do_pronostic(request, room_id):
 	tournament_id = room.tournament_id
 	if request.method == "POST":
 		num_games = Game.objects.filter(tournament_id=tournament_id).count()
-		form_data = querydict_to_dict(request.POST)
+		form_data = get_do_pronostic_data(request.POST)
 		for num in range(num_games):
-			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "user":current_user, "room":room}
+			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "penalties_win": int(form_data.get("penalties_win")[num]), "user":current_user, "room":room}
 			pronostic = Pronostic.objects.filter(game_id=pronostic_data.get("game"), user_id=current_user.id, room_id=room_id).first()
 			if pronostic and pronostic.checked:
 				break
 			if pronostic:
 				pronostic.home_goals = pronostic_data.get("home_goals")
 				pronostic.away_goals = pronostic_data.get("away_goals")
+				if pronostic.game.is_knockout:
+					pronostic.penalties_win = pronostic_data.get("penalties_win")
 				pronostic.save()
 			else:
 				form = PronosticForm(pronostic_data)
