@@ -1,6 +1,6 @@
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic
-from commons.utils import querydict_to_dict
+from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 
 
 def get_penalties_win(form_data):
@@ -75,3 +75,19 @@ def new_pronostic_by_form(pronostic_data):
 		form.save()
 	else:
 		print(form.errors.as_data())
+
+def check_pronostics_results():
+	"""Check pronostics versus games results and it updates status and pronostics points
+	"""
+	pronostics = Pronostic.objects.filter(checked=False)
+	for pronostic in pronostics:
+		game = Game.objects.filter(id=pronostic.game.id).first()
+		if is_correct_same_result(pronostic, game):
+			points = POINTS_CORRECT_SAME_RESULT
+		elif is_correct_different_result(pronostic, game):
+			points = POINTS_CORRECT_DIFF_RESULT
+		else:
+			points = POINTS_INCORRECT_RESULT
+		pronostic.checked = True
+		pronostic.points = points
+		pronostic.save()
