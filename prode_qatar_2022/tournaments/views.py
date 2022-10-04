@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect, reverse
-from django.db.models import Count, Sum
-from tournaments.models import Game, Pronostic, Room
+from django.shortcuts import render, redirect
+from django.db.models import Sum
+from tournaments.models import Game, Pronostic
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
-from commons.tournaments import get_all_pronostics_by_user_and_room, update_pronostic, new_pronostic_by_form, get_do_pronostic_data
-from commons.utils import is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
+from commons.tournaments import get_all_pronostics_by_user_and_room, update_pronostic, new_pronostic_by_form, get_do_pronostic_data, check_pronostics_results
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -76,19 +75,7 @@ def do_pronostic(request, room_id):
 				data)
 
 def check_pronostics(request):
-    # only pronostics with 'checked' in False
-	pronostics = Pronostic.objects.filter(checked=False)
-	for pronostic in pronostics:
-		game = Game.objects.filter(id=pronostic.game.id).first()
-		if is_correct_same_result(pronostic, game):
-			points = POINTS_CORRECT_SAME_RESULT
-		elif is_correct_different_result(pronostic, game):
-			points = POINTS_CORRECT_DIFF_RESULT
-		else:
-			points = POINTS_INCORRECT_RESULT
-		pronostic.checked = True
-		pronostic.points = points
-		pronostic.save()
+	check_pronostics_results()
 	return redirect('all_games')
 
 
