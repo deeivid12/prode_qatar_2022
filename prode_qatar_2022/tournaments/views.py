@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, reverse
 from django.db.models import Count, Sum
 from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
-from commons.utils import querydict_to_dict, get_do_pronostic_data, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
+from commons.tournaments import get_all_pronostics_by_user_and_room, update_pronostic, new_pronostic_by_form, get_do_pronostic_data
+from commons.utils import is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -51,12 +52,10 @@ def get_games_list(request):
 
 def do_pronostic(request, room_id):
 	# need to be authenticated, otherwise it won't work
-	# the idea is having a list of tournaments_ids...
 	current_user = request.user
 	room = current_user.tournaments_rooms.filter(id=room_id).first()
-	tournament_id = room.tournament_id
 	if request.method == "POST":
-		num_games = Game.objects.filter(tournament_id=tournament_id).count()
+		num_games = Game.objects.filter(tournament_id=room.tournament_id).count()
 		form_data = get_do_pronostic_data(request.POST)
 		for num in range(num_games):
 			pronostic_data = {"game": int(form_data.get("pronostic_game")[num]),"home_goals": int(form_data.get("home_goals")[num]), "away_goals": int(form_data.get("away_goals")[num]), "penalties_win": int(form_data.get("penalties_win")[num]), "user":current_user, "room":room}
@@ -64,26 +63,12 @@ def do_pronostic(request, room_id):
 			if pronostic and pronostic.checked:
 				break
 			if pronostic:
-				pronostic.home_goals = pronostic_data.get("home_goals")
-				pronostic.away_goals = pronostic_data.get("away_goals")
-				if pronostic.game.is_knockout:
-					pronostic.penalties_win = pronostic_data.get("penalties_win")
-				pronostic.save()
+				update_pronostic(pronostic, pronostic_data)
 			else:
-				form = PronosticForm(pronostic_data)
-				if form.is_valid():
-					form.save()
-				else:
-					print(form.errors.as_data())
+				new_pronostic_by_form(pronostic_data)
 		return redirect("do_pronostic", room_id=room_id)
 	else:
-		games = Game.objects.filter(tournament_id=tournament_id)
-		pronostics = []
-		for game in games:
-			pronostic = Pronostic.objects.filter(game_id=game.id, user_id=current_user.id, room_id=room_id).first()
-			if not pronostic:
-				pronostic = Pronostic(game=game, user=current_user, room=room)
-			pronostics.append(pronostic)
+		pronostics = get_all_pronostics_by_user_and_room(current_user, room)
 		forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
 		# forms and games have the same size
 		data = {"forms_pronostics": zip(forms, pronostics), "title": "Realizar Pronosticos"}
