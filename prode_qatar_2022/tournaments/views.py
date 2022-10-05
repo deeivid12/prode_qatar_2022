@@ -1,8 +1,7 @@
 from django.shortcuts import render, redirect
-from django.db.models import Sum
 from tournaments.models import Game, Pronostic
 from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
-from commons.tournaments import get_all_pronostics_by_user_and_room, update_pronostic, new_pronostic_by_form, get_do_pronostic_data, check_pronostics_results
+from commons.tournaments import get_all_pronostics_by_user_and_room, update_pronostic, new_pronostic_by_form, get_do_pronostic_data, check_pronostics_results, get_ranking_by_room
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -87,17 +86,12 @@ def get_points(request):
 	return redirect('all_games')
 
 
-def get_ranking_by_room(request, room_id):
+def get_ranking(request, room_id):
 	current_user = request.user
 	user_rooms_ids = User.objects.filter(id=current_user.id).first().tournaments_rooms.values_list('id', flat=True)
 	if room_id not in user_rooms_ids:
 		return JsonResponse({"error_404": "No corresponde el room con el usuario"})
-	pronostics_ranking = Pronostic.objects.values('user_id').filter(checked=True, room_id=room_id).annotate(total=Sum('points')).order_by('-total')
-	ranking = []
-	for idx, pronostic in enumerate(pronostics_ranking):
-		username = User.objects.filter(id=pronostic.get('user_id')).first().username
-		position = idx+1
-		ranking.append({'position': position, 'username': username, 'total':pronostic.get('total')})
+	ranking = get_ranking_by_room(room_id)
 	data = {"pronostics_ranking": ranking}
 	return render(request, "tournaments/pronostics_ranking.html", data)
 
