@@ -1,5 +1,7 @@
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic
+from django.contrib.auth.models import User
+from django.db.models import Sum
 from commons.utils import querydict_to_dict, is_correct_same_result, is_correct_different_result, POINTS_CORRECT_SAME_RESULT, POINTS_CORRECT_DIFF_RESULT, POINTS_INCORRECT_RESULT
 
 
@@ -91,3 +93,21 @@ def check_pronostics_results():
 		pronostic.checked = True
 		pronostic.points = points
 		pronostic.save()
+
+
+def get_ranking_by_room(room_id):
+	"""Gets ranking of users, for a room id given, in ascending order
+
+	Args:
+		room_id (int): Room id to calculate the ranking
+
+	Returns:
+		list: List of dicts with the following information: position, username and total
+	"""
+	pronostics_ranking = Pronostic.objects.values('user_id').filter(checked=True, room_id=room_id).annotate(total=Sum('points')).order_by('-total')
+	ranking = []
+	for idx, pronostic in enumerate(pronostics_ranking):
+		username = User.objects.filter(id=pronostic.get('user_id')).first().username
+		position = idx+1
+		ranking.append({'position': position, 'username': username, 'total':pronostic.get('total')})
+	return ranking
