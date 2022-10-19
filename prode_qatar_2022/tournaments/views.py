@@ -9,6 +9,8 @@ from commons.tournaments import (
     get_ranking_by_room,
 )
 from django.shortcuts import render, redirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -55,6 +57,7 @@ def get_games_list(request):
     return render(request, "tournaments/games_list.html", data)
 
 
+@login_required(login_url="login")
 def do_pronostic(request, room_id):
     # need to be authenticated, otherwise it won't work
     current_user = request.user
@@ -94,6 +97,7 @@ def do_pronostic(request, room_id):
         return render(request, "tournaments/do_pronostic.html", data)
 
 
+@staff_member_required
 def check_pronostics(request):
     check_pronostics_results()
     return redirect("all_games")
@@ -107,6 +111,7 @@ def get_points(request):
     return redirect("all_games")
 
 
+@login_required(login_url="login")
 def get_ranking(request, room_id):
     current_user = request.user
     user_rooms_ids = (
@@ -121,6 +126,7 @@ def get_ranking(request, room_id):
     return render(request, "tournaments/pronostics_ranking.html", data)
 
 
+@login_required(login_url="login")
 def get_rooms_list_by_user(request):
     current_user = request.user
     rooms = current_user.tournaments_rooms.all()
@@ -128,6 +134,7 @@ def get_rooms_list_by_user(request):
     return render(request, "tournaments/rooms_list.html", data)
 
 
+@login_required(login_url="login")
 def get_room(request, id):
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=id).first()
