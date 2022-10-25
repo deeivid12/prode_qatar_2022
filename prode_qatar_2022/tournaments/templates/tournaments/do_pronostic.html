@@ -55,4 +55,20 @@
 			
 		</div>
 	</div>
+<script>
+	function check_tie(element){
+		parent = element.parentNode.parentNode;
+		home_goals = parent.querySelector('[name="home_goals"]').value
+		away_goals = parent.querySelector('[name="away_goals"]').value
+		radio_buttons = parent.querySelectorAll('input[type="radio"]');
+		if (home_goals != away_goals){
+			radio_buttons[0].disabled = true;
+			radio_buttons[1].disabled = true;
+		}
+		else {
+			radio_buttons[0].removeAttribute("disabled");
+			radio_buttons[1].removeAttribute("disabled");
+		}
+	}
+</script>
 {% endblock %}
