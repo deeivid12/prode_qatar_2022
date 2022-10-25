@@ -41,5 +41,10 @@ class PronosticForm(forms.ModelForm):
                     "oninput": "check_tie(this)",
                 }
             ),
-            "away_goals": forms.NumberInput(attrs={"class": "form-control", "oninput": "check_tie(this)",}),
+            "away_goals": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "oninput": "check_tie(this)",
+                }
+            ),
         }
