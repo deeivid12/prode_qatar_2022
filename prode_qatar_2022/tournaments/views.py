@@ -80,7 +80,7 @@ def do_pronostic(request, room_id):
                 room_id=room_id,
             ).first()
             if pronostic and pronostic.checked:
-                break
+                continue
             if pronostic:
                 update_pronostic(pronostic, pronostic_data)
             else:
