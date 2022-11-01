@@ -33,7 +33,7 @@ class GameForm(forms.ModelForm):
 class PronosticForm(forms.ModelForm):
     class Meta:
         model = Pronostic
-        fields = "__all__"
+        exclude = ["last_modified"]
         widgets = {
             "home_goals": forms.NumberInput(
                 attrs={
