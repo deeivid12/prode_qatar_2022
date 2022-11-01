@@ -10,12 +10,16 @@ from commons.utils import (
     POINTS_CORRECT_DIFF_RESULT,
     POINTS_INCORRECT_RESULT,
 )
+from datetime import datetime
 
 
 def get_penalties_win(form_data):
     all_values = [{k[-1]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
     penalties = []
     for game_id in form_data.get("pronostic_game"):
+        if not all_values:
+            penalties.append("0")
+            continue
         for value in all_values:
             if game_id in value:
                 penalties.append(value.get(game_id))
@@ -50,7 +54,7 @@ def get_all_pronostics_by_user_and_room(user, room):
     Returns:
             list: List of pronostics
     """
-    games = Game.objects.filter(tournament_id=room.tournament_id)
+    games = Game.objects.filter(tournament_id=room.tournament_id).order_by("date_time")
     pronostics = []
     for game in games:
         pronostic = Pronostic.objects.filter(
@@ -69,11 +73,17 @@ def update_pronostic(pronostic, pronostic_data):
             pronostic (Pronostic model instance): Pronostic model instance
             pronostic_data (dict): Provided data like home_goals, away_goals, etc, to update the pronostic
     """
-    pronostic.home_goals = pronostic_data.get("home_goals")
-    pronostic.away_goals = pronostic_data.get("away_goals")
-    if pronostic.game.is_knockout:
-        pronostic.penalties_win = pronostic_data.get("penalties_win")
-    pronostic.save()
+    if (
+        pronostic.home_goals != pronostic_data.get("home_goals")
+        or pronostic.away_goals != pronostic_data.get("away_goals")
+        or pronostic.penalties_win != pronostic_data.get("penalties_win")
+    ):
+        pronostic.home_goals = pronostic_data.get("home_goals")
+        pronostic.away_goals = pronostic_data.get("away_goals")
+        if pronostic.game.is_knockout:
+            pronostic.penalties_win = pronostic_data.get("penalties_win")
+        pronostic.last_modified = datetime.now()
+        pronostic.save()
 
 
 def new_pronostic_by_form(pronostic_data):

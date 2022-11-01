@@ -22,6 +22,7 @@
 							<th>Visitante</th>
 							<th>Resultado</th>
 							<th>Puntos</th>
+							<th>Modificado</th>
 						</tr>
 					</thead>
 					
@@ -31,7 +32,7 @@
 						<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
 					<tbody>
 						<tr>
-							<td>20/11/2022</td>
+							<td>{{pronostic.game.date_time|date:"d-m-y H:i" }}</td>
 							<td>{{pronostic.game.home_team}}</td>
 							<td>{{form.home_goals}}</td>
 							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value={{pronostic.game.home_team.id}} {% if pronostic.penalties_win == pronostic.game.home_team.id %} checked {% endif %}/>{% endif %}</td>
@@ -45,6 +46,7 @@
 							{% else %}
 							<td>Pendiente</td>
 							{% endif %}
+							<td>{{pronostic.last_modified|date:"d-m-y H:i"}}</td>
 						</tr>
 					</tbody>
 					{% endfor %}
@@ -69,6 +71,26 @@
 			radio_buttons[0].removeAttribute("disabled");
 			radio_buttons[1].removeAttribute("disabled");
 		}
-	}
+	};
+	
+	function check_elements(){
+		elements = document.querySelectorAll('input[type="radio"]');
+		elements.forEach(function(element){
+			parent = element.parentNode.parentNode;
+			home_goals = parent.querySelector('[name="home_goals"]').value
+			away_goals = parent.querySelector('[name="away_goals"]').value
+			radio_buttons = parent.querySelectorAll('input[type="radio"]');
+			if (home_goals != away_goals){
+				radio_buttons[0].disabled = true;
+				radio_buttons[1].disabled = true;
+			}
+			else {
+				radio_buttons[0].removeAttribute("disabled");
+				radio_buttons[1].removeAttribute("disabled");
+				}})
+
+	};
+
+	window.onload = check_elements();
 </script>
 {% endblock %}
