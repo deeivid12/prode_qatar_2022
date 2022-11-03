@@ -7,12 +7,14 @@ from commons.tournaments import (
     get_do_pronostic_data,
     check_pronostics_results,
     get_ranking_by_room,
+    is_pronostic_in_time,
 )
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.contrib import messages
 
 
 def new_tournament(request):
@@ -60,6 +62,7 @@ def get_games_list(request):
 @login_required(login_url="login")
 def do_pronostic(request, room_id):
     # need to be authenticated, otherwise it won't work
+    game_already_played = False
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=room_id).first()
     if request.method == "POST":
@@ -79,12 +82,21 @@ def do_pronostic(request, room_id):
                 user_id=current_user.id,
                 room_id=room_id,
             ).first()
+            # enviar mensaje de error en dicho caso
+            if pronostic and not is_pronostic_in_time(pronostic.game.date_time):
+                game_already_played = True
+                continue
             if pronostic and pronostic.checked:
                 continue
             if pronostic:
                 update_pronostic(pronostic, pronostic_data)
             else:
                 new_pronostic_by_form(pronostic_data)
+        if game_already_played:
+            messages.warning(
+                request,
+                "Hay pronósticos que no se actualizaron porque los partidos ya se jugaron.",
+            )
         return redirect("do_pronostic", room_id=room_id)
     else:
         pronostics = get_all_pronostics_by_user_and_room(current_user, room)
