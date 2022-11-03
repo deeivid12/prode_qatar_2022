@@ -35,9 +35,9 @@
 							<td>{{pronostic.game.date_time|date:"d-m-y H:i" }}</td>
 							<td>{{pronostic.game.home_team}}</td>
 							<td>{{form.home_goals}}</td>
-							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value={{pronostic.game.home_team.id}} {% if pronostic.penalties_win == pronostic.game.home_team.id %} checked {% endif %}/>{% endif %}</td>
+							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</td>
 							<td>-</td>
-							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value={{pronostic.game.away_team.id}} {% if pronostic.penalties_win == pronostic.game.away_team.id %} checked {% endif %}/>{% endif %}</td>
+							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</td>
 							<td>{{form.away_goals}}</td>
 							<td>{{pronostic.game.away_team}}</td>
 							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
