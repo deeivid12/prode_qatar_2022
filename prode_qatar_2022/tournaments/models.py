@@ -1,6 +1,14 @@
+from random import choices
 from django.contrib.auth.models import User
 from django.db import models
 from datetime import datetime
+
+
+penalties_win_options = [
+    (0, "------------"),
+    (1, "Home Team"),
+    (2, "Away Team"),
+]
 
 
 class Tournament(models.Model):
@@ -34,7 +42,9 @@ class Game(models.Model):
     away_goals = models.PositiveSmallIntegerField(default=0)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     is_knockout = models.BooleanField(default=False)
-    penalties_win = models.PositiveSmallIntegerField(default=0)
+    penalties_win = models.PositiveSmallIntegerField(
+        default=0, choices=penalties_win_options
+    )
     date_time = models.DateTimeField()
 
     def __str__(self):
@@ -60,7 +70,9 @@ class Pronostic(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     home_goals = models.PositiveSmallIntegerField(default=0)
     away_goals = models.PositiveSmallIntegerField(default=0)
-    penalties_win = models.PositiveSmallIntegerField(default=0)
+    penalties_win = models.PositiveSmallIntegerField(
+        default=0, choices=penalties_win_options
+    )
     checked = models.BooleanField(default=False)
     info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
     points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
