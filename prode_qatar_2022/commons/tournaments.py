@@ -14,18 +14,26 @@ from datetime import datetime
 
 
 def get_penalties_win(form_data):
+    """It takes 'penalties win' data from form and it converts it the way
+    you can have a list with this information
+
+    Args:
+        form_data (dict): Data from form
+
+    Returns:
+        list: List with penalties win data
+    """
     all_values = [{k[-1]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
-    penalties = []
+    penalties = [] if all_values else ["0"] * len(form_data.get("pronostic_game"))
+    was_found = False
     for game_id in form_data.get("pronostic_game"):
-        if not all_values:
-            penalties.append("0")
-            continue
-        for value in all_values:
-            if game_id in value:
-                penalties.append(value.get(game_id))
+        for value_dict in all_values:
+            if value_dict.get(game_id):
+                penalties.append(value_dict.get(game_id))
+                was_found = True
                 break
-            else:
-                penalties.append("0")
+        if not was_found:
+            penalties.append("0")
     return penalties
 
 
@@ -142,3 +150,7 @@ def get_ranking_by_room(room_id):
             }
         )
     return ranking
+
+
+def is_pronostic_in_time(game_datetime):
+    return datetime.now().timestamp() < game_datetime.timestamp()
