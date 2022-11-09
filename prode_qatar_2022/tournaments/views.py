@@ -1,5 +1,11 @@
 from tournaments.models import Game, Pronostic
-from tournaments.forms import TeamForm, TournamentForm, GameForm, PronosticForm
+from tournaments.forms import (
+    TeamForm,
+    TournamentForm,
+    GameForm,
+    PronosticForm,
+    RoomForm,
+)
 from commons.tournaments import (
     get_all_pronostics_by_user_and_room,
     update_pronostic,
@@ -38,6 +44,28 @@ def new_team(request):
     else:
         form = TeamForm()
         data = {"form": form, "title": "Team"}
+    return render(request, "tournaments/new.html", data)
+
+
+@login_required(login_url="login")
+def new_room(request):
+    current_user = request.user
+    if request.method == "POST":
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            room = form.save()
+            room.users.set([current_user])
+            room.save()
+            messages.success(
+                request,
+                "Se ha registrado la sala correctamente.",
+            )
+            return redirect("all_rooms")
+        else:
+            print(form.errors.as_data())
+    else:
+        form = RoomForm()
+        data = {"form": form, "title": "Room"}
     return render(request, "tournaments/new.html", data)
 
 
