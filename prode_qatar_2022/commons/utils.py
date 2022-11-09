@@ -1,3 +1,6 @@
+import string
+import secrets
+
 # Constants
 
 POINTS_CORRECT_SAME_RESULT = 5
@@ -33,3 +36,9 @@ def is_correct_different_result(pronostic, game):
         penalties = game.penalties_win == pronostic.penalties_win
         return result and penalties
     return result
+
+
+def generate_room_code():
+    alphabet = string.ascii_letters + string.digits
+    room_code = "".join(secrets.choice(alphabet) for i in range(8)).upper()
+    return room_code
