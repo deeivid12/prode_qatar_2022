@@ -23,10 +23,10 @@ def get_penalties_win(form_data):
     Returns:
         list: List with penalties win data
     """
-    all_values = [{k[-1]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
+    all_values = [{k[7:]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
     penalties = [] if all_values else ["0"] * len(form_data.get("pronostic_game"))
-    was_found = False
     for game_id in form_data.get("pronostic_game"):
+        was_found = False
         for value_dict in all_values:
             if value_dict.get(game_id):
                 penalties.append(value_dict.get(game_id))
@@ -102,7 +102,9 @@ def new_pronostic_by_form(pronostic_data):
     """
     form = PronosticForm(pronostic_data)
     if form.is_valid():
-        form.save()
+        pronostic = form.save(commit=False)
+        pronostic.last_modified = datetime.now()
+        pronostic.save()
     else:
         print(form.errors.as_data())
 
