@@ -23,6 +23,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 
 
+@staff_member_required
 def new_tournament(request):
     if request.method == "POST":
         form = TournamentForm(request.POST)
@@ -35,6 +36,7 @@ def new_tournament(request):
     return render(request, "tournaments/new.html", data)
 
 
+@staff_member_required
 def new_team(request):
     if request.method == "POST":
         form = TeamForm(request.POST)
@@ -69,6 +71,7 @@ def new_room(request):
     return render(request, "tournaments/new.html", data)
 
 
+@staff_member_required
 def new_game(request):
     if request.method == "POST":
         form = GameForm(request.POST)
