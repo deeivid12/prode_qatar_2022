@@ -2,6 +2,7 @@ from random import choices
 from django.contrib.auth.models import User
 from django.db import models
 from datetime import datetime
+from commons.utils import generate_room_code
 
 
 penalties_win_options = [
@@ -59,6 +60,9 @@ class Room(models.Model):
     users = models.ManyToManyField(User, related_name="tournaments_rooms")
     grand_prize = models.CharField(max_length=100)
     private = models.BooleanField(default=True)
+    room_code = models.CharField(
+        max_length=8, blank=False, null=False, unique=True, default=generate_room_code
+    )
 
     def __str__(self):
         return f"{self.name} - {self.tournament}"
@@ -76,7 +80,7 @@ class Pronostic(models.Model):
     checked = models.BooleanField(default=False)
     info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
     points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
-    last_modified = models.DateTimeField(default=datetime.now())
+    last_modified = models.DateTimeField(default=datetime.now)
 
     def __str__(self):
         return f"{self.game} ({self.home_goals}-{self.away_goals})"
