@@ -1,0 +1,24 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+	{% for room in rooms %}
+		<div class="row">
+			<div class="col col-md-6 offset-md-3 ">
+				<div class="card">
+					<h5 class="card-header">{{room.name}}</h5>
+					<div class="card-body">
+					<h5 class="card-title">{{room.tournament}}</h5>
+					<p class="card-text">Premio: {{room.grand_prize}}</p>
+					<p class="card-text">Código: {{room.room_code}}</p>
+					<a href="{% url 'get_room' room.id %}" class="btn btn-dark">Ingresar</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		</br>
+	{% endfor %}
+{% endblock %}

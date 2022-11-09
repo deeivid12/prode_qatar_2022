@@ -1,0 +1,1 @@
+web: gunicorn prode_qatar_2022.wsgi --log-file -

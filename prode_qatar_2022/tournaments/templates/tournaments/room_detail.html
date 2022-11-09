@@ -1,0 +1,54 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col col-md-6 offset-md-3 ">
+		<div class="list-group">
+			<a href="{% url 'do_pronostic' room.id %}" class="list-group-item list-group-item-action">
+			<div class="d-flex w-100 justify-content-center">
+				<h5 class="mb-1">Mis Predicciones</h5>
+			</div>
+			<p class="mb-1">Predicciones para {{room.name}}</p>
+			</a>
+			<a href="{% url 'ranking' room.id %}" class="list-group-item list-group-item-action">
+				<div class="d-flex w-100 justify-content-center">
+					<h5 class="mb-1">Ranking</h5>
+				</div>
+				<p class="mb-1">Tabla de posiciones para {{room.name}}</p>
+			</a>
+			<a href="#" class="list-group-item list-group-item-action">
+				<div class="d-flex w-100 justify-content-center">
+					<h5 class="mb-1">Mis Puntos</h5>
+				</div>
+				<p class="mb-1">Puntos obtenidos en cada partido de {{room.name}}</p>
+			</a>
+			<a href="{% url 'all_games' %}" class="list-group-item list-group-item-action">
+				<div class="d-flex w-100 justify-content-center">
+					<h5 class="mb-1">Resultados Partidos</h5>
+				</div>
+				<p class="mb-1">Resultados de partidos de {{room.tournament}}</p>
+			</a>
+	  </div>
+	</div>
+</div>
+	
+	<!-- <ul class="list-group">
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'do_pronostic' room.id %}">Mis Predicciones</a>
+		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'ranking' room.id %}">Ranking</a>
+		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="#">Mis Puntos</a>
+		</li>
+		<li class="list-group-item list-group-item-dark text-center">
+			<a href="{% url 'all_games' %}">Resultados Partidos</a>
+		</li>
+		</br>
+	</ul> -->
+{% endblock %}
