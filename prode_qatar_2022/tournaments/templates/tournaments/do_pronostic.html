@@ -11,9 +11,9 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col col-md-6 offset-md-3">
+		<div class="col col-md-8 col-lg-6 offset-md-2 offset-lg-3">
 			<form method="post">
-				<table class="table table-dark table-hover">
+				<!-- <table class="table table-dark table-hover">
 					<thead>
 						<tr>
 							<th>Fecha</th>
@@ -28,13 +28,13 @@
 							<th>Puntos</th>
 							<th>Modificado</th>
 						</tr>
-					</thead>
+					</thead> -->
 					
 					{% for form, pronostic in forms_pronostics %}
 						{% csrf_token %}
 						<!-- {{form.game_id}} -->
 						<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
-					<tbody>
+					<!-- <tbody>
 						<tr>
 							<td>{{pronostic.game.date_time|date:"d-m-y H:i" }}</td>
 							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
@@ -52,11 +52,32 @@
 							{% endif %}
 							<td>{{pronostic.last_modified|date:"d-m-y H:i"}}</td>
 						</tr>
-					</tbody>
+					</tbody> -->
+					<div class="card text-center m-4 border border-dark">
+						<div class="card-header text-white bg-dark">
+							{{pronostic.game.date_time|date:"d/m/y - H:i" }}hs.
+						</div>
+						<div class="card-body row">
+							<h6 class="col-12 card-title">Fase de Grupos</h6>
+							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.home_team.name}}</div>
+							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.home_team.fifa_code}}</div>
+							<div class="col-2">{{form.home_goals}}</div>
+							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</div>
+							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</div>
+							<div class="col-2">{{form.away_goals}}</div>
+							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.away_team.name}}</div>
+							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.away_team.fifa_code}}</div>
+						  <p class="card-text mt-3">Pronóstico modificado: {{pronostic.last_modified|date:"d/m/y - H:i"}}hs.</p>
+						</div>
+						<div class="card-footer text-white bg-dark">
+						  Resultado: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}} | Puntos: {% if pronostic.points >= 0 %} {{pronostic.points}} {% else %} Pendiente {% endif %}
+						</div>
+					  </div>
 					{% endfor %}
 				</table>
+			<button class="btn btn-dark mb-3">Atrás</button>
+			<button type="submit" class="btn btn-dark mb-3">Guardar</button>
 			</br>
-			<button type="submit" class="btn btn-dark">Guardar</button>
 			</form>
 			
 		</div>
