@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block content %}
-		
+	<div class="row">
+		<div class="col m-3">
+			<h5>Sala: Prueba</h5>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col col-md-6 offset-md-3">
 			<form method="post">
@@ -13,6 +17,7 @@
 					<thead>
 						<tr>
 							<th>Fecha</th>
+							<th>Resultado</th>
 							<th>Local</th>
 							<th>L</th>
 							<th></th>
@@ -20,7 +25,6 @@
 							<th></th>
 							<th>V</th>
 							<th>Visitante</th>
-							<th>Resultado</th>
 							<th>Puntos</th>
 							<th>Modificado</th>
 						</tr>
@@ -33,14 +37,14 @@
 					<tbody>
 						<tr>
 							<td>{{pronostic.game.date_time|date:"d-m-y H:i" }}</td>
-							<td>{{pronostic.game.home_team}}</td>
+							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
+							<td>{{pronostic.game.home_team.fifa_code}}</td>
 							<td>{{form.home_goals}}</td>
 							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</td>
 							<td>-</td>
 							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</td>
 							<td>{{form.away_goals}}</td>
-							<td>{{pronostic.game.away_team}}</td>
-							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
+							<td>{{pronostic.game.away_team.fifa_code}}</td>
 							{% if pronostic.points >= 0 %}
 							<td>{{pronostic.points}}</td>
 							{% else %}
@@ -52,7 +56,7 @@
 					{% endfor %}
 				</table>
 			</br>
-			<button type="submit" class="btn btn-dark">Save</button>
+			<button type="submit" class="btn btn-dark">Guardar</button>
 			</form>
 			
 		</div>
