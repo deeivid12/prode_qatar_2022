@@ -6,15 +6,29 @@
 
 {% block content %}
 <div class="row">
-	<div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
-		<ul class="list-group">
+	<div class="col col-md-6 offset-md-3">
+		<table class="table table-dark table-hover">
+			<thead>
+				<tr>
+					<th>Fecha</th>
+					<th>Local</th>
+					<th>Resultado</th>
+					<th>Visitante</th>
+				</tr>
+			</thead>
+			
 			{% for game in games %}
-			<li class="list-group-item list-group-item-dark text-center">
-				{{game.home_team}} vs {{game.away_team}}
-			</li>
-			</br>
+			<tbody>
+				<tr>
+					<td>{{game.date_time|date:"d-m-y H:i" }}</td>
+					<td>{{game.home_team.fifa_code}}</td>
+					<td>{{game.home_goals}}-{{game.away_goals}}</td>
+					<td>{{game.away_team.fifa_code}}</td>
+				</tr>
+			</tbody>
 			{% endfor %}
-		</ul>
+		</table>
 	</div>
 </div>
+
 {% endblock %}
