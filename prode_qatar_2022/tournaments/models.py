@@ -1,3 +1,4 @@
+from enum import unique
 from random import choices
 from django.contrib.auth.models import User
 from django.db import models
@@ -27,6 +28,7 @@ class Tournament(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
+    fifa_code = models.CharField(max_length=3, unique=False)
 
     def __str__(self):
         return self.name
