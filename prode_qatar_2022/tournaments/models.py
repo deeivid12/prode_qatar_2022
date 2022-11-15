@@ -1,8 +1,8 @@
 from enum import unique
 from random import choices
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.db import models
-from datetime import datetime
 from commons.utils import generate_room_code
 
 
@@ -82,7 +82,7 @@ class Pronostic(models.Model):
     checked = models.BooleanField(default=False)
     info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
     points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
-    last_modified = models.DateTimeField(default=datetime.now)
+    last_modified = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.game} ({self.home_goals}-{self.away_goals})"

@@ -1,6 +1,7 @@
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.db.models import Sum
 from commons.utils import (
     querydict_to_dict,
@@ -10,7 +11,6 @@ from commons.utils import (
     POINTS_CORRECT_DIFF_RESULT,
     POINTS_INCORRECT_RESULT,
 )
-from datetime import datetime
 
 
 def get_penalties_win(form_data):
@@ -90,7 +90,7 @@ def update_pronostic(pronostic, pronostic_data):
         pronostic.away_goals = pronostic_data.get("away_goals")
         if pronostic.game.is_knockout:
             pronostic.penalties_win = pronostic_data.get("penalties_win")
-        pronostic.last_modified = datetime.now()
+        pronostic.last_modified = timezone.now()
         pronostic.save()
 
 
@@ -103,7 +103,7 @@ def new_pronostic_by_form(pronostic_data):
     form = PronosticForm(pronostic_data)
     if form.is_valid():
         pronostic = form.save(commit=False)
-        pronostic.last_modified = datetime.now()
+        pronostic.last_modified = timezone.now()
         pronostic.save()
     else:
         print(form.errors.as_data())
@@ -155,4 +155,4 @@ def get_ranking_by_room(room_id):
 
 
 def is_pronostic_in_time(game_datetime):
-    return datetime.now().timestamp() < game_datetime.timestamp()
+    return timezone.now().timestamp() < game_datetime.timestamp()

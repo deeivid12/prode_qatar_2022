@@ -79,18 +79,18 @@ WSGI_APPLICATION = "prode_qatar_2022.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # },
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "railway",
-        "USER": "root",
-        "PASSWORD": "FBSak8A8wNHHY8mkXgyY",
-        "HOST": "containers-us-west-121.railway.app",
-        "PORT": "5765",
-    }
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+    # "default": {
+    #     "ENGINE": "django.db.backends.mysql",
+    #     "NAME": "railway",
+    #     "USER": "root",
+    #     "PASSWORD": "FBSak8A8wNHHY8mkXgyY",
+    #     "HOST": "containers-us-west-121.railway.app",
+    #     "PORT": "5765",
+    # }
 }
 
 CSRF_TRUSTED_ORIGINS = [
@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Argentina/Buenos_Aires"
 
 USE_I18N = True
 
