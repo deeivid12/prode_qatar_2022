@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "tournaments",
     "members",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "prode_qatar_2022.urls"
@@ -91,7 +93,10 @@ DATABASES = {
     }
 }
 
-CSRF_TRUSTED_ORIGINS = ["https://prodeqatar2022-production.up.railway.app/"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://prodeqatar2022-production.up.railway.app/",
+    "https://*.prodeqatar2022-production.up.railway.app/",
+]
 
 
 # Password validation
