@@ -1,5 +1,5 @@
 from tournaments.forms import PronosticForm
-from tournaments.models import Game, Pronostic
+from tournaments.models import Game, Pronostic, Room
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum
@@ -147,6 +147,18 @@ def get_ranking_by_room(room_id):
         .order_by("-total")
     )
     ranking = []
+    if len(pronostics_ranking) == 0:
+        users = Room.objects.filter(id=room_id).first().users.all()
+        for idx, user in enumerate(users):
+            position = idx + 1
+            ranking.append(
+                {
+                    "position": position,
+                    "username": user.username,
+                    "total": 0,
+                }
+            )
+        return ranking
     for idx, pronostic in enumerate(pronostics_ranking):
         username = User.objects.filter(id=pronostic.get("user_id")).first().username
         position = idx + 1
