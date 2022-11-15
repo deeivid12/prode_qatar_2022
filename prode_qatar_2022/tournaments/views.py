@@ -49,7 +49,7 @@ def new_team(request):
     return render(request, "tournaments/new.html", data)
 
 
-@login_required(login_url="login")
+@staff_member_required
 def new_room(request):
     current_user = request.user
     if request.method == "POST":
