@@ -49,6 +49,7 @@ class Game(models.Model):
         default=0, choices=penalties_win_options
     )
     date_time = models.DateTimeField()
+    played = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.home_team} vs {self.away_team} - {self.tournament}"

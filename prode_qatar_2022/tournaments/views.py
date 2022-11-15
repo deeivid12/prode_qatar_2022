@@ -97,7 +97,9 @@ def do_pronostic(request, room_id):
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=room_id).first()
     if request.method == "POST":
-        num_games = Game.objects.filter(tournament_id=room.tournament_id).count()
+        num_games = Game.objects.filter(
+            tournament_id=room.tournament_id, played=False
+        ).count()
         form_data = get_do_pronostic_data(request.POST)
         for num in range(num_games):
             pronostic_data = {
@@ -114,16 +116,20 @@ def do_pronostic(request, room_id):
                 room_id=room_id,
             ).first()
             # enviar mensaje de error en dicho caso
-            if pronostic and not is_pronostic_in_time(pronostic.game.date_time):
+            if pronostic and pronostic.game.played:
                 game_already_played = True
                 continue
             if pronostic and pronostic.checked:
+                game_already_played = True
+                continue
+            if pronostic and not is_pronostic_in_time(pronostic.game.date_time):
+                game_already_played = True
                 continue
             if pronostic:
                 update_pronostic(pronostic, pronostic_data)
             else:
                 new_pronostic_by_form(pronostic_data)
-        if game_already_played:
+        if game_already_played or not num_games:
             messages.warning(
                 request,
                 "Hay pronósticos que no se actualizaron porque los partidos ya se jugaron.",

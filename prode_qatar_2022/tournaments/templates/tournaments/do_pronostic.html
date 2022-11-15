@@ -13,68 +13,33 @@
 	<div class="row">
 		<div class="col col-md-8 col-lg-6 offset-md-2 offset-lg-3">
 			<form method="post">
-				<!-- <table class="table table-dark table-hover">
-					<thead>
-						<tr>
-							<th>Fecha</th>
-							<th>Resultado</th>
-							<th>Local</th>
-							<th>L</th>
-							<th></th>
-							<th>-</th>
-							<th></th>
-							<th>V</th>
-							<th>Visitante</th>
-							<th>Puntos</th>
-							<th>Modificado</th>
-						</tr>
-					</thead> -->
-					
-					{% for form, pronostic in forms_pronostics %}
-						{% csrf_token %}
-						<!-- {{form.game_id}} -->
-						<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
-					<!-- <tbody>
-						<tr>
-							<td>{{pronostic.game.date_time|date:"d-m-y H:i" }}</td>
-							<td>{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}</td>
-							<td>{{pronostic.game.home_team.fifa_code}}</td>
-							<td>{{form.home_goals}}</td>
-							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</td>
-							<td>-</td>
-							<td>{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</td>
-							<td>{{form.away_goals}}</td>
-							<td>{{pronostic.game.away_team.fifa_code}}</td>
-							{% if pronostic.points >= 0 %}
-							<td>{{pronostic.points}}</td>
-							{% else %}
-							<td>Pendiente</td>
-							{% endif %}
-							<td>{{pronostic.last_modified|date:"d-m-y H:i"}}</td>
-						</tr>
-					</tbody> -->
+				{% for form, pronostic in forms_pronostics %}
+					{% csrf_token %}
 					<div class="card text-center m-4 border border-dark">
 						<div class="card-header text-white bg-dark">
-							{{pronostic.game.date_time|date:"d/m/y - H:i" }}hs.
+							<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
+							{{pronostic.game.date_time|date:"d/m/y - H:i" }}hs. | {% if pronostic.game.played %} Partido Finalizado {% else %} Partido por disputarse {% endif %}
 						</div>
 						<div class="card-body row">
+							<div><input type="hidden" name="played" played={{pronostic.game.played}} value={{pronostic.game.played}}></div>
 							<h6 class="col-12 card-title">Fase de Grupos</h6>
+							<h6 class="col-12 card-title">Game id: {{pronostic.game.id}}</h6>
+							<h6 class="col-12 card-title">Pronostic id: {{pronostic.id}}</h6>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.home_team.name}}</div>
 							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.home_team.fifa_code}}</div>
-							<div class="col-2">{{form.home_goals}}</div>
+							<div class="col-2" {% if pronostic.game.played %} disabled {% endif %}>{{form.home_goals}}</div>
 							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</div>
 							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</div>
 							<div class="col-2">{{form.away_goals}}</div>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.away_team.name}}</div>
 							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.away_team.fifa_code}}</div>
-						  <p class="card-text mt-3">Pronóstico modificado: {{pronostic.last_modified|date:"d/m/y - H:i"}}hs.</p>
+						<p class="card-text mt-3">Pronóstico modificado: {{pronostic.last_modified|date:"d/m/y - H:i"}}hs.</p>
 						</div>
 						<div class="card-footer text-white bg-dark">
-						  Resultado: {{pronostic.game.home_goals}}-{{pronostic.game.away_goals}} | Puntos: {% if pronostic.points >= 0 %} {{pronostic.points}} {% else %} Pendiente {% endif %}
+						Resultado: {% if pronostic.game.played %}{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}{% else %}Pendiente{% endif %} | Puntos: {% if pronostic.points >= 0 %} {{pronostic.points}} {% else %} Pendiente {% endif %}
 						</div>
-					  </div>
-					{% endfor %}
-				</table>
+					</div>
+				{% endfor %}
 			<button class="btn btn-dark mb-3">Atrás</button>
 			<button type="submit" class="btn btn-dark mb-3">Guardar</button>
 			</br>
@@ -99,17 +64,27 @@
 	};
 	
 	function check_elements(){
-		elements = document.querySelectorAll('input[type="radio"]');
+		// elements = document.querySelectorAll('input[type="radio"]');
+		elements = document.querySelectorAll("div.card-body.row")
 		elements.forEach(function(element){
-			parent = element.parentNode.parentNode;
-			home_goals = parent.querySelector('[name="home_goals"]').value
-			away_goals = parent.querySelector('[name="away_goals"]').value
-			radio_buttons = parent.querySelectorAll('input[type="radio"]');
-			if (home_goals != away_goals){
+			// parent = element.parentNode.parentNode;
+			played = element.querySelector('[name="played"]').getAttribute("played")
+			home_goals = element.querySelector('[name="home_goals"]')
+			away_goals = element.querySelector('[name="away_goals"]')
+			radio_buttons = element.querySelectorAll('input[type="radio"]');
+			if (played == "True"){
+				home_goals.disabled = true;
+				away_goals.disabled = true;
+				if (radio_buttons.length != 0) {
+					radio_buttons[0].disabled = true;
+					radio_buttons[1].disabled = true;
+				}
+			}
+			else if (home_goals.value != away_goals.value && radio_buttons.length != 0){
 				radio_buttons[0].disabled = true;
 				radio_buttons[1].disabled = true;
 			}
-			else {
+			else if(radio_buttons.length != 0) {
 				radio_buttons[0].removeAttribute("disabled");
 				radio_buttons[1].removeAttribute("disabled");
 				}})

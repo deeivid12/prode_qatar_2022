@@ -23,8 +23,12 @@ def get_penalties_win(form_data):
     Returns:
         list: List with penalties win data
     """
-    all_values = [{k[7:]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
+    all_values = [
+        {k[7:]: v[0]} for k, v in form_data.items() if k.startswith("ko_win_")
+    ]
     penalties = [] if all_values else ["0"] * len(form_data.get("pronostic_game"))
+    if penalties:
+        return penalties
     for game_id in form_data.get("pronostic_game"):
         was_found = False
         for value_dict in all_values:
@@ -113,7 +117,9 @@ def check_pronostics_results():
     """Check pronostics versus games results and it updates status and pronostics points"""
     pronostics = Pronostic.objects.filter(checked=False)
     for pronostic in pronostics:
-        game = Game.objects.filter(id=pronostic.game.id).first()
+        game = Game.objects.filter(id=pronostic.game.id, played=True).first()
+        if not game:
+            continue
         if is_correct_same_result(pronostic, game):
             points = POINTS_CORRECT_SAME_RESULT
         elif is_correct_different_result(pronostic, game):
