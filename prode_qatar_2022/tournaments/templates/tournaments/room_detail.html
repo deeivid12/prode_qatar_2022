@@ -6,6 +6,13 @@
 
 {% block content %}
 <div class="row">
+	<div class="col mt-2">
+		<h5>{{room_name}}</h5>
+		<h6>Torneo: {{tournament}}</h5>
+		<h6>Premio: {{grand_prize}}</h5>
+	</div>
+</div>
+<div class="row m-4">
 	<div class="col col-md-6 offset-md-3 ">
 		<div class="list-group">
 			<a href="{% url 'do_pronostic' room.id %}" class="list-group-item list-group-item-action">
@@ -20,12 +27,12 @@
 				</div>
 				<p class="mb-1">Tabla de posiciones para {{room.name}}</p>
 			</a>
-			<a href="#" class="list-group-item list-group-item-action">
+			<!-- <a href="#" class="list-group-item list-group-item-action">
 				<div class="d-flex w-100 justify-content-center">
 					<h5 class="mb-1">Mis Puntos</h5>
 				</div>
 				<p class="mb-1">Puntos obtenidos en cada partido de {{room.name}}</p>
-			</a>
+			</a> -->
 			<a href="{% url 'all_games' %}" class="list-group-item list-group-item-action">
 				<div class="d-flex w-100 justify-content-center">
 					<h5 class="mb-1">Resultados Partidos</h5>

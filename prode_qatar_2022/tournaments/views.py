@@ -196,5 +196,10 @@ def get_rooms_list_by_user(request):
 def get_room(request, id):
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=id).first()
-    data = {"room": room}
+    data = {
+        "room": room,
+        "room_name": room.name,
+        "tournament": room.tournament.name,
+        "grand_prize": room.grand_prize,
+    }
     return render(request, "tournaments/room_detail.html", data)
