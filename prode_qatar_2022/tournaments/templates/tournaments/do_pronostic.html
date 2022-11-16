@@ -22,7 +22,7 @@
 							<input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
 							{{pronostic.game.date_time|date:"d/m/y - H:i" }}hs. | {% if pronostic.game.played %} Partido Finalizado {% else %} Partido por disputarse {% endif %}
 						</div>
-						<div class="card-body row">
+						<div class="card-body row m-0">
 							<div><input type="hidden" name="played" played={{pronostic.game.played}} value={{pronostic.game.played}}></div>
 							<h6 class="col-12 card-title">Fase de Grupos</h6>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.home_team.name}}</div>
@@ -75,6 +75,7 @@
 			away_goals = element.querySelector('[name="away_goals"]')
 			radio_buttons = element.querySelectorAll('input[type="radio"]');
 			if (played == "True"){
+				element.classList.add("bg-secondary");
 				home_goals.disabled = true;
 				away_goals.disabled = true;
 				if (radio_buttons.length != 0) {
