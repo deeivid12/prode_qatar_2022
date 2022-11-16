@@ -6,8 +6,10 @@
 
 {% block content %}
 	<div class="row">
-		<div class="col m-3">
-			<h5>Sala: Prueba</h5>
+		<div class="col mt-2">
+			<h5>{{room_name}}</h5>
+			<h6>Torneo: {{tournament}}</h5>
+			<h6>Premio: {{grand_prize}}</h5>
 		</div>
 	</div>
 	<div class="row">
@@ -23,16 +25,14 @@
 						<div class="card-body row">
 							<div><input type="hidden" name="played" played={{pronostic.game.played}} value={{pronostic.game.played}}></div>
 							<h6 class="col-12 card-title">Fase de Grupos</h6>
-							<h6 class="col-12 card-title">Game id: {{pronostic.game.id}}</h6>
-							<h6 class="col-12 card-title">Pronostic id: {{pronostic.id}}</h6>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.home_team.name}}</div>
-							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.home_team.fifa_code}}</div>
-							<div class="col-2" {% if pronostic.game.played %} disabled {% endif %}>{{form.home_goals}}</div>
-							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</div>
-							<div class="col-1">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</div>
-							<div class="col-2">{{form.away_goals}}</div>
+							<div class="d-block d-md-none col-2 col-md-3 p-0 fw-bold">{{pronostic.game.home_team.fifa_code}}</div>
+							<div class="col-3 col-md-2 p-0" {% if pronostic.game.played %} disabled {% endif %}>{{form.home_goals}}</div>
+							<div class="col-1 p-0">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>{% endif %}</div>
+							<div class="col-1 p-0">{% if pronostic.game.is_knockout %}<input class="form-check-input" required=true type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>{% endif %}</div>
+							<div class="col-3 col-md-2 p-0">{{form.away_goals}}</div>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.away_team.name}}</div>
-							<div class="d-block d-md-none col-3 fw-bold">{{pronostic.game.away_team.fifa_code}}</div>
+							<div class="d-block d-md-none col-2 col-md-3 p-0 fw-bold">{{pronostic.game.away_team.fifa_code}}</div>
 						<p class="card-text mt-3">Pronóstico modificado: {{pronostic.last_modified|date:"d/m/y - H:i"}}hs.</p>
 						</div>
 						<div class="card-footer text-white bg-dark">

@@ -1,4 +1,4 @@
-from tournaments.models import Game, Pronostic
+from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import (
     TeamForm,
     TournamentForm,
@@ -142,6 +142,9 @@ def do_pronostic(request, room_id):
         data = {
             "forms_pronostics": zip(forms, pronostics),
             "title": "Realizar Pronosticos",
+            "room_name": room.name,
+            "tournament": room.tournament.name,
+            "grand_prize": room.grand_prize,
         }
         return render(request, "tournaments/do_pronostic.html", data)
 
@@ -163,6 +166,7 @@ def get_points(request):
 @login_required(login_url="login")
 def get_ranking(request, room_id):
     current_user = request.user
+    room = Room.objects.filter(id=room_id).first()
     user_rooms_ids = (
         User.objects.filter(id=current_user.id)
         .first()
@@ -171,7 +175,12 @@ def get_ranking(request, room_id):
     if room_id not in user_rooms_ids:
         return JsonResponse({"error_404": "No corresponde el room con el usuario"})
     ranking = get_ranking_by_room(room_id)
-    data = {"pronostics_ranking": ranking}
+    data = {
+        "pronostics_ranking": ranking,
+        "room_name": room.name,
+        "tournament": room.tournament.name,
+        "grand_prize": room.grand_prize,
+    }
     return render(request, "tournaments/pronostics_ranking.html", data)
 
 
