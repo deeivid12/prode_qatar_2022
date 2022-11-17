@@ -11,6 +11,7 @@ from commons.utils import (
     POINTS_CORRECT_DIFF_RESULT,
     POINTS_INCORRECT_RESULT,
 )
+from datetime import timedelta
 
 
 def get_penalties_win(form_data):
@@ -173,4 +174,4 @@ def get_ranking_by_room(room_id):
 
 
 def is_pronostic_in_time(game_datetime):
-    return timezone.now().timestamp() < game_datetime.timestamp()
+    return timezone.now().timestamp() < (game_datetime - timedelta(hours=1)).timestamp()
