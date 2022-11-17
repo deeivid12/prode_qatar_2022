@@ -1,0 +1,31 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>{{title}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col col-md-8 col-lg-6 col-xl-4 mx-auto mt-2 mb-4">
+		<h5>¡Hola, {{user.username|title}}!</h5>
+		<h6>¡Gracias por ser parte del Prode Qatar 2022!</h6>
+		</br>
+		<p class="text-center">A continuación verás las reglas básicas del juego:</p>
+		<ul class="list-group">
+			<li class="list-group-item"><p class="text-start">Cada pronóstico acertado con el resultado final del partido, sin considerar la cantidad de goles, sumará 3 puntos.
+			</br>
+			Ejemplo: ARG-BRA, Resultado: 2-0, Pronóstico 3-1</p></li>
+			<li class="list-group-item"><p class="text-start">Cada pronóstico acertado con el resultado final del partido, considerando la cantidad de goles, sumará 5 puntos.
+			</br>
+			Ejemplo: ARG-BRA, Resultado: 2-0, Pronóstico 2-0</p></li>
+			<li class="list-group-item"><p class="text-start">Cada pronóstico no acertado con el resultado final del partido, sumará 0 puntos.</p></li>
+			<li class="list-group-item"><p class="text-start">A partir de 8vos de final en adelante, si en el pronóstico se eligiera como resultado un empate, deberá obligatoriamente elegir qué equipo pasará a la siguiente ronda.</p></li>
+			<li class="list-group-item"><p class="text-start">Sólo podrán modificarse pronósticos hasta 1 hora antes del comienzo del partido.</p></li>
+			<li class="list-group-item"><p class="text-start">Ganará el juego quien sume la mayor cantidad de puntos posibles.</p></li>
+		  </ul>
+		</br>
+		<h6 class="text-center">¡Mucha Suerte!</h6>
+		<a href="{% url 'all_rooms' %}" class="btn btn-dark m-4">Mis Torneos</a>
+	</div>
+</div>
+{% endblock %}

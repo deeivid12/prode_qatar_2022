@@ -27,10 +27,13 @@ from tournaments.views import (
     check_pronostics,
     get_points,
     get_ranking,
+    welcome,
 )
 
 urlpatterns = [
+    path("", welcome),
     path("admin/", admin.site.urls, name="admin"),
+    path("welcome", welcome, name="welcome"),
     path("new_tournament", new_tournament, name="new_tournament"),
     path("new_team", new_team, name="new_team"),
     path("new_game", new_game, name="new_game"),

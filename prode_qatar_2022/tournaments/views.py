@@ -203,3 +203,9 @@ def get_room(request, id):
         "grand_prize": room.grand_prize,
     }
     return render(request, "tournaments/room_detail.html", data)
+
+
+@login_required(login_url="login")
+def welcome(request):
+    current_user = request.user
+    return render(request, "tournaments/welcome.html")
