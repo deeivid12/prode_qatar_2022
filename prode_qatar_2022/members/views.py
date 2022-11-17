@@ -11,7 +11,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect("all_games")
+            return redirect("welcome")
         else:
             messages.warning(
                 request,
@@ -26,6 +26,10 @@ def register_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(
+                request,
+                "Usuario creado correctamente.",
+            )
             return redirect("login")
         data = {"form": form}
     else:

@@ -27,7 +27,7 @@
 				<tr>
 					<td>{{game.date_time|date:"d/m/y | H:i" }} hs.</td>
 					<td>{{game.home_team.fifa_code}}</td>
-					<td>{{game.home_goals}}-{{game.away_goals}}</td>
+					<td>{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}Pendiente{% endif %}</td>
 					<td>{{game.away_team.fifa_code}}</td>
 				</tr>
 			</tbody>
