@@ -24,7 +24,7 @@
 						</div>
 						<div class="card-body row m-0">
 							<div><input type="hidden" name="played" played={{pronostic.game.played}} value={{pronostic.game.played}}></div>
-							<h6 class="col-12 card-title">Fase de Grupos</h6>
+							<h6 class="col-12 card-title">{% if pronostic.game.game_instance == 0 %}Fase de Grupos{% elif pronostic.game.game_instance == 1 %}Octavos de Final{% elif pronostic.game.game_instance == 2 %}Cuartos de Final{% elif pronostic.game.game_instance == 3 %}Semifinal{% elif pronostic.game.game_instance == 4 %}Final{% endif %}</h6>
 							<div class="d-none d-md-block col-md-3 fw-bold">{{pronostic.game.home_team.name}}</div>
 							<div class="d-block d-md-none col-2 col-md-3 p-0 fw-bold">{{pronostic.game.home_team.fifa_code}}</div>
 							<div class="col-3 col-md-2 p-0" {% if pronostic.game.played %} disabled {% endif %}>{{form.home_goals}}</div>
@@ -80,6 +80,8 @@
 				away_goals.disabled = true;
 				home_goals.setAttribute("style", "background-color: #b5babe;");
 				away_goals.setAttribute("style", "background-color: #b5babe;");
+				home_goals.setAttribute("class", "form-control");
+				away_goals.setAttribute("class", "form-control");
 				if (radio_buttons.length != 0) {
 					radio_buttons[0].disabled = true;
 					radio_buttons[1].disabled = true;
