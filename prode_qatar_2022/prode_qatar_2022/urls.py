@@ -28,6 +28,7 @@ from tournaments.views import (
     get_points,
     get_ranking,
     welcome,
+    join_room,
 )
 
 urlpatterns = [
@@ -38,6 +39,7 @@ urlpatterns = [
     path("new_team", new_team, name="new_team"),
     path("new_game", new_game, name="new_game"),
     path("new_room", new_room, name="new_room"),
+    path("join_room/<room_code>", join_room, name="join_room"),
     # path('do_pronostic', do_pronostic, name="do_pronostic"),
     path("all_games", get_games_list, name="all_games"),
     path("all_rooms", get_rooms_list_by_user, name="all_rooms"),

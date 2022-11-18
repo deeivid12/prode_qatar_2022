@@ -209,3 +209,29 @@ def get_room(request, id):
 def welcome(request):
     current_user = request.user
     return render(request, "tournaments/welcome.html")
+
+
+@login_required(login_url="login")
+def join_room(request, room_code):
+    current_user = request.user
+    room = Room.objects.filter(room_code=room_code).first()
+    if room:
+        found_user = room.users.filter(id=current_user.id).first()
+        if not found_user:
+            room.users.add(current_user)
+            room.save()
+            messages.success(
+                request,
+                "Se ha unido a la sala correctamente.",
+            )
+        else:
+            messages.warning(
+                request,
+                "Usted ya participa de esta sala porque se ha unido previamente.",
+            )
+    else:
+        messages.warning(
+                request,
+                "No se puede unir porque el codigo es incorrecto.",
+            )
+    return redirect("welcome")
