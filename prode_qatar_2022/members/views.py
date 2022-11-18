@@ -31,6 +31,12 @@ def register_user(request):
                 "Usuario creado correctamente.",
             )
             return redirect("login")
+        else:
+            messages.error(
+                request,
+                "Error al crear usuario.",
+            )
+            return redirect("register")
         data = {"form": form}
     else:
         form = UserCreationForm()
