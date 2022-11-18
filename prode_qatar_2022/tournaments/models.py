@@ -35,6 +35,13 @@ class Team(models.Model):
 
 
 class Game(models.Model):
+    game_instance_options = [
+        (0, "Groups"),
+        (1, "Round of 16"),
+        (2, "Quarter-Finals"),
+        (3, "Semi-Finals"),
+        (4, "Finals"),
+    ]
     home_team = models.ForeignKey(
         Team, null=False, related_name="home_team", on_delete=models.CASCADE
     )
@@ -50,6 +57,9 @@ class Game(models.Model):
     )
     date_time = models.DateTimeField()
     played = models.BooleanField(default=False)
+    game_instance = models.PositiveSmallIntegerField(
+        default=0, choices=game_instance_options
+    )
 
     def __str__(self):
         return f"{self.home_team} vs {self.away_team} - {self.tournament}"
