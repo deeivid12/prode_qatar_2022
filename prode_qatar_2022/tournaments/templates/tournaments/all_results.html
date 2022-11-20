@@ -21,32 +21,34 @@
 		  </h2>
 		  <div id="collapse{{game.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion{{game.id}}">
 			<div class="accordion-body">
-				<div class="row">
-					<div class="col-10 col-md-8 col-lg-6 mx-auto">
-						<table class="table table-dark rounded overflow-hidden">
-							<thead>
-								<tr>
-									<th>Usuario</th>
-									<th>Local</th>
-									<th>Prediccion</th>
-									<th>Visita</th>
-									<th>Puntos</th>
-								</tr>
-							</thead>
-							{% for pronostic in pronostics %}
-							<tbody>
-								<tr>
-									<td>{{pronostic.user|title}}</td>
-									<td>{{game.home_team.fifa_code}}</td>
-									<td>{{pronostic.home_goals}} - {{pronostic.away_goals}}</td>
-									<td>{{game.away_team.fifa_code}}</td>
-									<td>{{pronostic.points}}</td>
-								</tr>
-							</tbody>
-							{% endfor %}
-						</table>
-					</div>
-				</div>
+				<!-- <div class="row">
+					<div class="col-10 col-md-8 col-lg-6 mx-auto"> -->
+						<div class="table-responsive">
+							<table class="table table-dark rounded overflow-hidden">
+								<thead>
+									<tr>
+										<th>Usuario</th>
+										<th>L</th>
+										<th>-</th>
+										<th>V</th>
+										<th>Puntos</th>
+									</tr>
+								</thead>
+								{% for pronostic in pronostics %}
+								<tbody>
+									<tr>
+										<td>{{pronostic.user|title}}</td>
+										<td>{{game.home_team.fifa_code}}</td>
+										<td>{{pronostic.home_goals}} - {{pronostic.away_goals}}</td>
+										<td>{{game.away_team.fifa_code}}</td>
+										<td>{{pronostic.points}}</td>
+									</tr>
+								</tbody>
+								{% endfor %}
+							</table>
+						</div>
+					<!-- </div>
+				</div> -->
 			</div>
 		  </div>
 		</div>
