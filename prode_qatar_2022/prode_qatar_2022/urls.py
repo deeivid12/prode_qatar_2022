@@ -29,6 +29,7 @@ from tournaments.views import (
     get_ranking,
     welcome,
     join_room,
+    all_results_by_room,
 )
 
 urlpatterns = [
@@ -46,6 +47,11 @@ urlpatterns = [
     path("all_rooms/<int:id>", get_room, name="get_room"),
     path("all_rooms/<int:room_id>/do_pronostic", do_pronostic, name="do_pronostic"),
     path("all_rooms/<int:room_id>/ranking", get_ranking, name="ranking"),
+    path(
+        "all_rooms/<int:room_id>/all_results",
+        all_results_by_room,
+        name="all_results",
+    ),
     path("check_pronostics", check_pronostics, name="check_pronostics"),
     path("get_points", get_points, name="get_points"),
     path("accounts/", include("django.contrib.auth.urls")),

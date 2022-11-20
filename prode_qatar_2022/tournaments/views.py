@@ -231,7 +231,27 @@ def join_room(request, room_code):
             )
     else:
         messages.warning(
-                request,
-                "No se puede unir porque el codigo es incorrecto.",
-            )
+            request,
+            "No se puede unir porque el codigo es incorrecto.",
+        )
     return redirect("welcome")
+
+
+def all_results_by_room(request, room_id):
+    current_user = request.user
+    room = current_user.tournaments_rooms.filter(id=room_id).first()
+    if not room:
+        messages.error(
+            request,
+            "Usted no pertenece a esa sala.",
+        )
+        redirect("welcome")
+    played_games = Game.objects.filter(
+        played=True, tournament=room.tournament.id
+    ).all()  # poner tournament
+    all_pronostics = []
+    for game in played_games:
+        pronostics_by_game = Pronostic.objects.filter(game=game.id, room=room.id).all()
+        all_pronostics.append(pronostics_by_game)
+    data = {"games_pronostics": zip(played_games, all_pronostics)}
+    return render(request, "tournaments/all_results.html", data)
