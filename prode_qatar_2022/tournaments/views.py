@@ -85,7 +85,7 @@ def new_game(request):
 
 
 def get_games_list(request):
-    games = Game.objects.all()
+    games = Game.objects.order_by("date_time").all()
     data = {"games": games, "title": "Todos los partidos"}
     return render(request, "tournaments/games_list.html", data)
 
