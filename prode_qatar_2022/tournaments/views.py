@@ -21,6 +21,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib import messages
+from django.utils import timezone
+from django.utils.timezone import make_aware
+from datetime import datetime, timedelta
 
 
 @staff_member_required
@@ -246,12 +249,15 @@ def all_results_by_room(request, room_id):
             "Usted no pertenece a esa sala.",
         )
         redirect("welcome")
-    played_games = Game.objects.filter(
-        played=True, tournament=room.tournament.id
+    start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
+    end_date = timezone.now() - timedelta(hours=1)
+    games_to_show = Game.objects.filter(
+        date_time__range=(start_date, end_date),
+        tournament=room.tournament.id,
     ).all()  # poner tournament
     all_pronostics = []
-    for game in played_games:
+    for game in games_to_show:
         pronostics_by_game = Pronostic.objects.filter(game=game.id, room=room.id).all()
         all_pronostics.append(pronostics_by_game)
-    data = {"games_pronostics": zip(played_games, all_pronostics)}
+    data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)
