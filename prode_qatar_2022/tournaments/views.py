@@ -250,7 +250,7 @@ def all_results_by_room(request, room_id):
         )
         redirect("welcome")
     start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
-    end_date = timezone.now() - timedelta(hours=1)
+    end_date = timezone.now() + timedelta(minutes=55)
     games_to_show = Game.objects.filter(
         date_time__range=(start_date, end_date),
         tournament=room.tournament.id,

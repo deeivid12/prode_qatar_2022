@@ -16,7 +16,7 @@
 		<div class="accordion-item">
 		  <h2 class="accordion-header" id="headingOne">
 			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{game.id}}" aria-expanded="true" aria-controls="collapse{{game.id}}">
-				{% if game.played %}{{game.home_team}} {{game.home_goals}} - {{game.away_goals}} {{game.away_team}}{% else %}{{game.home_team}} - {{game.away_team}} {% endif %}| {% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos de Final{% elif game.game_instance == 2 %}Cuartos de Final{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %} |{% if game.played %} Finalizado {% else %} Pendiente {% endif %}
+				{% if game.played %}{{game.home_team}} {{game.home_goals}} - {{game.away_goals}} {{game.away_team}}{% else %}{{game.home_team}} - {{game.away_team}}{% endif %} | {% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos de Final{% elif game.game_instance == 2 %}Cuartos de Final{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %} |{% if game.played %} Finalizado {% else %} Pendiente {% endif %}
 			</button>
 		  </h2>
 		  <div id="collapse{{game.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion{{game.id}}">
