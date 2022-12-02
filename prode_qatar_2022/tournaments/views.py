@@ -251,10 +251,14 @@ def all_results_by_room(request, room_id):
         redirect("welcome")
     start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
     end_date = timezone.now() + timedelta(minutes=55)
-    games_to_show = Game.objects.filter(
-        date_time__range=(start_date, end_date),
-        tournament=room.tournament.id,
-    ).all()  # poner tournament
+    games_to_show = (
+        Game.objects.filter(
+            date_time__range=(start_date, end_date),
+            tournament=room.tournament.id,
+        )
+        .order_by("date_time")
+        .all()
+    )  # poner tournament
     all_pronostics = []
     for game in games_to_show:
         pronostics_by_game = Pronostic.objects.filter(game=game.id, room=room.id).all()
