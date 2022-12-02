@@ -67,7 +67,9 @@ def get_all_pronostics_by_user_and_room(user, room):
     Returns:
             list: List of pronostics
     """
-    games = Game.objects.filter(tournament_id=room.tournament_id).order_by("date_time")
+    games = Game.objects.filter(
+        tournament_id=room.tournament_id, played=False
+    ).order_by("date_time")
     pronostics = []
     for game in games:
         pronostic = Pronostic.objects.filter(
