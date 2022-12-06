@@ -31,6 +31,7 @@
 										<th>L</th>
 										<th>-</th>
 										<th>V</th>
+										<th>PK</th>
 										<th>Puntos</th>
 									</tr>
 								</thead>
@@ -41,6 +42,7 @@
 										<td>{{game.home_team.fifa_code}}</td>
 										<td>{{pronostic.home_goals}} - {{pronostic.away_goals}}</td>
 										<td>{{game.away_team.fifa_code}}</td>
+										<td>{% if pronostic.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif pronostic.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
 										<td>{% if game.played %}{{pronostic.points}}{% else %}-{% endif %}</td>
 									</tr>
 								</tbody>

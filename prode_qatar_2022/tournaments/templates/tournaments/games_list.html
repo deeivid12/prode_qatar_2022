@@ -19,6 +19,7 @@
 					<th>Local</th>
 					<th>Resultado</th>
 					<th>Visitante</th>
+					<th>PK</th>
 					<th>Instancia</th>
 				</tr>
 			</thead>
@@ -30,6 +31,7 @@
 					<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.home_team.fifa_code}}</td>
 					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}Pendiente{% endif %}</td>
 					<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.away_team.fifa_code}}</td>
+					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif game.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
 					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos de Final{% elif game.game_instance == 2 %}Cuartos de Final{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %}</td>
 				</tr>
 			</tbody>
