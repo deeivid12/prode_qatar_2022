@@ -104,8 +104,8 @@ DATABASES = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://prodeqatar2022-production.up.railway.app/",
-    "https://*.prodeqatar2022-production.up.railway.app/",
+    "https://prode-argsub20.up.railway.app/",
+    "https://*.prode-argsub20.up.railway.app/",
 ]
 
 
