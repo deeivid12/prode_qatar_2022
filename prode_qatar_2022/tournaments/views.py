@@ -7,7 +7,7 @@ from tournaments.forms import (
     RoomForm,
 )
 from commons.tournaments import (
-    get_all_pronostics_by_user_and_room,
+    get_all_pronostics_by_user,
     update_pronostic,
     new_pronostic_by_form,
     get_do_pronostic_data,
@@ -111,12 +111,10 @@ def do_pronostic(request, room_id):
                 "away_goals": int(form_data.get("away_goals")[num]),
                 "penalties_win": int(form_data.get("penalties_win")[num]),
                 "user": current_user,
-                "room": room,
             }
             pronostic = Pronostic.objects.filter(
                 game_id=pronostic_data.get("game"),
                 user_id=current_user.id,
-                room_id=room_id,
             ).first()
             # enviar mensaje de error en dicho caso
             if pronostic and pronostic.game.played:
@@ -139,7 +137,7 @@ def do_pronostic(request, room_id):
             )
         return redirect("do_pronostic", room_id=room_id)
     else:
-        pronostics = get_all_pronostics_by_user_and_room(current_user, room)
+        pronostics = get_all_pronostics_by_user(current_user, room)
         forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
         # forms and games have the same size
         data = {
@@ -249,6 +247,8 @@ def all_results_by_room(request, room_id):
             "Usted no pertenece a esa sala.",
         )
         redirect("welcome")
+    users = room.users.all()
+    users_ids = [user.id for user in users]
     start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
     end_date = timezone.now() + timedelta(minutes=55)
     games_to_show = (
@@ -261,7 +261,7 @@ def all_results_by_room(request, room_id):
     )  # poner tournament
     all_pronostics = []
     for game in games_to_show:
-        pronostics_by_game = Pronostic.objects.filter(game=game.id, room=room.id).all()
+        pronostics_by_game = Pronostic.objects.filter(game=game.id, user_id__in=users_ids).all()
         all_pronostics.append(pronostics_by_game)
     data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)

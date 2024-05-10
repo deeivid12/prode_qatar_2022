@@ -57,7 +57,7 @@ def get_do_pronostic_data(request_data):
     return data
 
 
-def get_all_pronostics_by_user_and_room(user, room):
+def get_all_pronostics_by_user(user, room):
     """Get all pronostics for an user, a room and a tournament_id given.
 
     Args:
@@ -73,10 +73,10 @@ def get_all_pronostics_by_user_and_room(user, room):
     pronostics = []
     for game in games:
         pronostic = Pronostic.objects.filter(
-            game_id=game.id, user_id=user.id, room_id=room.id
+            game_id=game.id, user_id=user.id
         ).first()
         if not pronostic:
-            pronostic = Pronostic(game=game, user=user, room=room)
+            pronostic = Pronostic(game=game, user=user)
         pronostics.append(pronostic)
     return pronostics
 
