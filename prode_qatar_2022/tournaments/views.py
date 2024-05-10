@@ -19,6 +19,7 @@ from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Sum, F
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -165,7 +166,7 @@ def get_points(request):
 
 
 @login_required(login_url="login")
-def get_ranking(request, room_id):
+def get_ranking_2(request, room_id):
     current_user = request.user
     room = Room.objects.filter(id=room_id).first()
     user_rooms_ids = (
@@ -176,6 +177,41 @@ def get_ranking(request, room_id):
     if room_id not in user_rooms_ids:
         return JsonResponse({"error_404": "No corresponde el room con el usuario"})
     ranking = get_ranking_by_room(room_id)
+    data = {
+        "pronostics_ranking": ranking,
+        "room_name": room.name,
+        "tournament": room.tournament.name,
+        "grand_prize": room.grand_prize,
+    }
+    return render(request, "tournaments/pronostics_ranking.html", data)
+
+@login_required(login_url="login")
+def get_ranking(request, room_id):
+    current_user = request.user
+    user_rooms_ids = (
+        User.objects.filter(id=current_user.id)
+        .first()
+        .tournaments_rooms.values_list("id", flat=True)
+    )
+    if room_id not in user_rooms_ids:
+        return JsonResponse({"error_404": "No corresponde el room con el usuario"})
+    ranking = []
+    room = Room.objects.filter(id=room_id).first()
+    tournament_id = room.tournament.id
+    users = room.users.all()
+    users_ids = [user.id for user in users]
+    for user_id in users_ids:
+        pronostics_data = list(
+            Pronostic.objects
+            .filter(game__tournament_id=tournament_id, user_id=user_id)
+            .annotate(total=Sum('points'))
+            .annotate(username=F('user__username'))
+            .values('username', 'total')
+            .order_by('-total')
+        )
+        ranking.extend(pronostics_data)
+    ranking = sorted(ranking, key=lambda x: x['total'], reverse=True)
+    ranking = [{'position': idx + 1, **item} for idx, item in enumerate(ranking)]
     data = {
         "pronostics_ranking": ranking,
         "room_name": room.name,
