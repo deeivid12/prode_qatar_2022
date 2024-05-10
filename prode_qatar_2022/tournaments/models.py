@@ -84,7 +84,6 @@ class Room(models.Model):
 class Pronostic(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     home_goals = models.PositiveSmallIntegerField(default=0)
     away_goals = models.PositiveSmallIntegerField(default=0)
     penalties_win = models.PositiveSmallIntegerField(
