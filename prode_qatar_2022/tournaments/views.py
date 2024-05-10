@@ -7,7 +7,7 @@ from tournaments.forms import (
     RoomForm,
 )
 from commons.tournaments import (
-    get_all_pronostics_by_user_and_room,
+    get_all_pronostics_by_user,
     update_pronostic,
     new_pronostic_by_form,
     get_do_pronostic_data,
@@ -19,6 +19,7 @@ from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Sum, F
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -111,12 +112,10 @@ def do_pronostic(request, room_id):
                 "away_goals": int(form_data.get("away_goals")[num]),
                 "penalties_win": int(form_data.get("penalties_win")[num]),
                 "user": current_user,
-                "room": room,
             }
             pronostic = Pronostic.objects.filter(
                 game_id=pronostic_data.get("game"),
                 user_id=current_user.id,
-                room_id=room_id,
             ).first()
             # enviar mensaje de error en dicho caso
             if pronostic and pronostic.game.played:
@@ -139,7 +138,7 @@ def do_pronostic(request, room_id):
             )
         return redirect("do_pronostic", room_id=room_id)
     else:
-        pronostics = get_all_pronostics_by_user_and_room(current_user, room)
+        pronostics = get_all_pronostics_by_user(current_user, room)
         forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
         # forms and games have the same size
         data = {
@@ -167,7 +166,7 @@ def get_points(request):
 
 
 @login_required(login_url="login")
-def get_ranking(request, room_id):
+def get_ranking_2(request, room_id):
     current_user = request.user
     room = Room.objects.filter(id=room_id).first()
     user_rooms_ids = (
@@ -178,6 +177,41 @@ def get_ranking(request, room_id):
     if room_id not in user_rooms_ids:
         return JsonResponse({"error_404": "No corresponde el room con el usuario"})
     ranking = get_ranking_by_room(room_id)
+    data = {
+        "pronostics_ranking": ranking,
+        "room_name": room.name,
+        "tournament": room.tournament.name,
+        "grand_prize": room.grand_prize,
+    }
+    return render(request, "tournaments/pronostics_ranking.html", data)
+
+@login_required(login_url="login")
+def get_ranking(request, room_id):
+    current_user = request.user
+    user_rooms_ids = (
+        User.objects.filter(id=current_user.id)
+        .first()
+        .tournaments_rooms.values_list("id", flat=True)
+    )
+    if room_id not in user_rooms_ids:
+        return JsonResponse({"error_404": "No corresponde el room con el usuario"})
+    ranking = []
+    room = Room.objects.filter(id=room_id).first()
+    tournament_id = room.tournament.id
+    users = room.users.all()
+    users_ids = [user.id for user in users]
+    for user_id in users_ids:
+        pronostics_data = list(
+            Pronostic.objects
+            .filter(game__tournament_id=tournament_id, user_id=user_id)
+            .annotate(total=Sum('points'))
+            .annotate(username=F('user__username'))
+            .values('username', 'total')
+            .order_by('-total')
+        )
+        ranking.extend(pronostics_data)
+    ranking = sorted(ranking, key=lambda x: x['total'], reverse=True)
+    ranking = [{'position': idx + 1, **item} for idx, item in enumerate(ranking)]
     data = {
         "pronostics_ranking": ranking,
         "room_name": room.name,
@@ -249,6 +283,8 @@ def all_results_by_room(request, room_id):
             "Usted no pertenece a esa sala.",
         )
         redirect("welcome")
+    users = room.users.all()
+    users_ids = [user.id for user in users]
     start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
     end_date = timezone.now() + timedelta(minutes=55)
     games_to_show = (
@@ -261,7 +297,7 @@ def all_results_by_room(request, room_id):
     )  # poner tournament
     all_pronostics = []
     for game in games_to_show:
-        pronostics_by_game = Pronostic.objects.filter(game=game.id, room=room.id).all()
+        pronostics_by_game = Pronostic.objects.filter(game=game.id, user_id__in=users_ids).all()
         all_pronostics.append(pronostics_by_game)
     data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)
