@@ -167,6 +167,8 @@ def get_points(request):
 
 @login_required(login_url="login")
 def get_ranking_2(request, room_id):
+    """This is a deprecated function."""
+
     current_user = request.user
     room = Room.objects.filter(id=room_id).first()
     user_rooms_ids = (
@@ -185,6 +187,7 @@ def get_ranking_2(request, room_id):
     }
     return render(request, "tournaments/pronostics_ranking.html", data)
 
+
 @login_required(login_url="login")
 def get_ranking(request, room_id):
     current_user = request.user
@@ -200,17 +203,14 @@ def get_ranking(request, room_id):
     tournament_id = room.tournament.id
     users = room.users.all()
     users_ids = [user.id for user in users]
-    for user_id in users_ids:
-        pronostics_data = list(
-            Pronostic.objects
-            .filter(game__tournament_id=tournament_id, user_id=user_id)
-            .annotate(total=Sum('points'))
-            .annotate(username=F('user__username'))
-            .values('username', 'total')
-            .order_by('-total')
-        )
-        ranking.extend(pronostics_data)
-    ranking = sorted(ranking, key=lambda x: x['total'], reverse=True)
+    pronostics_data = list(
+        Pronostic.objects
+        .filter(game__tournament_id=tournament_id, user_id__in=users_ids)
+        .values(username=F('user__username'))
+        .annotate(total=Sum('points', default=0))
+        .order_by('-total')
+    )
+    ranking = sorted(pronostics_data, key=lambda x: x['total'] or 0, reverse=True)
     ranking = [{'position': idx + 1, **item} for idx, item in enumerate(ranking)]
     data = {
         "pronostics_ranking": ranking,
