@@ -118,19 +118,18 @@ def do_pronostic(request, room_id):
                 user_id=current_user.id,
             ).first()
             # enviar mensaje de error en dicho caso
-            if pronostic and pronostic.game.played:
-                game_already_played = True
-                continue
-            if pronostic and pronostic.checked:
-                game_already_played = True
-                continue
-            if pronostic and not is_pronostic_in_time(pronostic.game.date_time):
-                game_already_played = True
-                continue
             if pronostic:
+                if pronostic.game.played or pronostic.checked or not is_pronostic_in_time(pronostic.game.date_time):
+                    game_already_played = True
+                    continue
                 update_pronostic(pronostic, pronostic_data)
             else:
-                new_pronostic_by_form(pronostic_data)
+                game = Game.objects.filter(id=pronostic_data.get("game")).first()
+                if game and is_pronostic_in_time(game.date_time):
+                    new_pronostic_by_form(pronostic_data)
+                else:
+                    game_already_played = True
+                    continue
         if game_already_played or not num_games:
             messages.warning(
                 request,
