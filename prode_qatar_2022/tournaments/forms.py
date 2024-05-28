@@ -57,3 +57,22 @@ class PronosticForm(forms.ModelForm):
                 }
             ),
         }
+
+
+class GameAdminForm(forms.ModelForm):
+    class Meta:
+        model = Game
+        fields = '__all__'
+
+    home_team = forms.ModelChoiceField(
+        queryset=Team.objects.all().order_by('name'),
+        widget=forms.Select(attrs={'class': 'vTextField'})
+    )
+    away_team = forms.ModelChoiceField(
+        queryset=Team.objects.all().order_by('name'),
+        widget=forms.Select(attrs={'class': 'vTextField'})
+    )
+    tournament = forms.ModelChoiceField(
+        queryset=Tournament.objects.all().order_by('name'),
+        widget=forms.Select(attrs={'class': 'vTextField'})
+    )
