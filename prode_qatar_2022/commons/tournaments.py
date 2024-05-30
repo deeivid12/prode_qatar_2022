@@ -1,7 +1,8 @@
 from tournaments.forms import PronosticForm
-from tournaments.models import Game, Pronostic, Room
+from tournaments.models import Game, Pronostic, Room, Team, Tournament
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db import transaction
 from django.db.models import Sum
 from commons.utils import (
     querydict_to_dict,
@@ -177,3 +178,36 @@ def get_ranking_by_room(room_id):
 
 def is_pronostic_in_time(game_datetime):
     return timezone.now().timestamp() < (game_datetime - timedelta(hours=1)).timestamp()
+
+
+def insert_teams_batch(teams_batch):
+    try:
+        with transaction.atomic():
+            for team in teams_batch:
+                existing_team = Team.objects.filter(name=team.get("name")).first()
+                if existing_team:
+                    raise Exception(f"Team {existing_team.name} ya existe en db. Proceso abortado.")
+                new_team = Team(**team)
+                new_team.save()
+        return True
+    except Exception as exc:
+        print(f"Error al insertar lote de teams: {exc}")
+        raise Exception(exc)
+
+
+def insert_games_batch(games_batch):
+    try:
+        with transaction.atomic():
+            for game in games_batch:
+                home_team = Team.objects.filter(name=game.get("home_team")).first()
+                away_team = Team.objects.filter(name=game.get("away_team")).first()
+                tournament = Tournament.objects.filter(name=game.get("tournament")).first()
+                new_game = Game(home_team=home_team,
+                                away_team=away_team,
+                                tournament=tournament,
+                                date_time=game.get("date_time"))
+                new_game.save()
+        return True
+    except Exception as exc:
+        print(f"Error al insertar lote de games: {exc}")
+        raise Exception(exc)

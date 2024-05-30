@@ -30,6 +30,7 @@ from tournaments.views import (
     welcome,
     join_room,
     all_results_by_room,
+    bulk_creation
 )
 
 urlpatterns = [
@@ -54,6 +55,7 @@ urlpatterns = [
     ),
     path("check_pronostics", check_pronostics, name="check_pronostics"),
     path("get_points", get_points, name="get_points"),
+    path("<str:model>/bulk-creation", bulk_creation, name="bulk_creation"),
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/", include("members.urls")),
 ]
