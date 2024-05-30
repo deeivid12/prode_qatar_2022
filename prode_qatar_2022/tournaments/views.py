@@ -14,7 +14,10 @@ from commons.tournaments import (
     check_pronostics_results,
     get_ranking_by_room,
     is_pronostic_in_time,
+    insert_games_batch,
+    insert_teams_batch
 )
+from commons.bullk_creation import bulk_teams, bulk_games
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -300,3 +303,20 @@ def all_results_by_room(request, room_id):
         all_pronostics.append(pronostics_by_game)
     data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)
+
+
+@staff_member_required
+def bulk_creation(request, model):
+    options = {"team": insert_teams_batch,
+               "game": insert_games_batch}
+    bulk_data = {"team": bulk_teams,
+                 "game": bulk_games}
+    if model not in options or model not in bulk_data:
+        return JsonResponse({"error": "No se puede crear con modelo seleccionado."})
+    try:
+        insert_func = options[model]
+        data = bulk_data[model]
+        insert_func(data)
+    except Exception as exc:
+        return JsonResponse({"error": f"No se pudo ejecutar: {exc}"})
+    return JsonResponse({"success": "Inserts masivos ejecutados correctamente."})
