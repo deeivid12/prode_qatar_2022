@@ -1,3 +1,4 @@
+import os
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic, Room, Team, Tournament
 from django.contrib.auth.models import User
@@ -177,7 +178,8 @@ def get_ranking_by_room(room_id):
 
 
 def is_pronostic_in_time(game_datetime):
-    return timezone.now().timestamp() < (game_datetime - timedelta(hours=1)).timestamp()
+    MINUTES = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
+    return timezone.now().timestamp() < (game_datetime - timedelta(minutes=MINUTES)).timestamp()
 
 
 def insert_teams_batch(teams_batch):
