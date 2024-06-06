@@ -15,3 +15,12 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
+
+# copy entrypoint.sh
+COPY docker-entrypoint.sh /usr/src/prode_qatar_2022/docker-entrypoint.sh
+
+# ensure the entrypoint.sh has execute permission
+RUN chmod +x /usr/src/prode_qatar_2022/docker-entrypoint.sh
+
+# set entrypoint.sh as the entrypoint
+ENTRYPOINT ["sh", "/usr/src/prode_qatar_2022/docker-entrypoint.sh"]
