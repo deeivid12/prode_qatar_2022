@@ -5,26 +5,24 @@
 {% endblock %}
 
 {% block content %}
-	{% if messages %}
-		{% for message in messages %}
-		<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-			{{ message }}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div>
-		{% endfor %}
-	{% endif %}
-	<div class="form-group">
+<div class="row">
+	<div class="col mt-2 mb-4">
+		<h5>Iniciar Sesion</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-8 col-sm-6 col-md-4 col-lg-3 col-xl-2 mx-auto form-group">
 		<form method="post">
 			{% csrf_token %}
 			<!-- Email input -->
-			<div class="form-outline mb-4">
-			  <input type="text" name="username" id="username" class="form-control" />
+			<div class="form-outline mb-2">
+			  <input type="text" name="username" id="username" class="form-control mb-2" />
 			  <label class="form-label" for="username">Usuario</label>
 			</div>
 		  
 			<!-- Password input -->
-			<div class="form-outline mb-4">
-			  <input type="password" name="password" id="password" class="form-control" />
+			<div class="form-outline mb-2">
+			  <input type="password" name="password" id="password" class="form-control mb-2" />
 			  <label class="form-label" for="password">Password</label>
 			</div>
 		  
@@ -37,36 +35,16 @@
 				  <label class="form-check-label" for="form2Example31"> Recordarme </label>
 				</div>
 			  </div>
-		  
-			  <div class="col">
-				<!-- Simple link -->
-				<a href="#!">Recuperar password</a>
-			  </div>
 			</div>
 		  
 			<!-- Submit button -->
-			<button type="submit" class="btn btn-dark btn-block mb-4">Sign in</button>
+			<button type="submit" class="btn btn-dark btn-block mb-4">Ingresar</button>
 		  
 			<!-- Register buttons -->
 			<div class="text-center">
-			  <p>Not a member? <a href="#!">Register</a></p>
-			  <p>or sign up with:</p>
-			  <button type="button" class="btn btn-link btn-floating mx-1">
-				<i class="fab fa-facebook-f"></i>
-			  </button>
-		  
-			  <button type="button" class="btn btn-link btn-floating mx-1">
-				<i class="fab fa-google"></i>
-			  </button>
-		  
-			  <button type="button" class="btn btn-link btn-floating mx-1">
-				<i class="fab fa-twitter"></i>
-			  </button>
-		  
-			  <button type="button" class="btn btn-link btn-floating mx-1">
-				<i class="fab fa-github"></i>
-			  </button>
+			  <p>¿No esta registrado? <a href="{% url 'register' %}">Registro</a></p>
 			</div>
 		  </form>
 	</div>
+</div>
 {% endblock %}

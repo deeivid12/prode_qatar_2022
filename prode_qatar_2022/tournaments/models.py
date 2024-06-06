@@ -1,7 +1,8 @@
+from enum import unique
 from random import choices
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.db import models
-from datetime import datetime
 from commons.utils import generate_room_code
 
 
@@ -27,12 +28,20 @@ class Tournament(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
+    fifa_code = models.CharField(max_length=3, unique=False)
 
     def __str__(self):
         return self.name
 
 
 class Game(models.Model):
+    game_instance_options = [
+        (0, "Groups"),
+        (1, "Round of 16"),
+        (2, "Quarter-Finals"),
+        (3, "Semi-Finals"),
+        (4, "Finals"),
+    ]
     home_team = models.ForeignKey(
         Team, null=False, related_name="home_team", on_delete=models.CASCADE
     )
@@ -47,6 +56,10 @@ class Game(models.Model):
         default=0, choices=penalties_win_options
     )
     date_time = models.DateTimeField()
+    played = models.BooleanField(default=False)
+    game_instance = models.PositiveSmallIntegerField(
+        default=0, choices=game_instance_options
+    )
 
     def __str__(self):
         return f"{self.home_team} vs {self.away_team} - {self.tournament}"
@@ -80,7 +93,7 @@ class Pronostic(models.Model):
     checked = models.BooleanField(default=False)
     info = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
     points = models.PositiveSmallIntegerField(blank=True, null=True, default=None)
-    last_modified = models.DateTimeField(default=datetime.now)
+    last_modified = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.game} ({self.home_goals}-{self.away_goals})"
