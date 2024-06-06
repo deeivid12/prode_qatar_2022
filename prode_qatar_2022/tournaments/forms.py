@@ -46,13 +46,13 @@ class PronosticForm(forms.ModelForm):
         widgets = {
             "home_goals": forms.NumberInput(
                 attrs={
-                    "class": "form-control border border-dark",
+                    "class": "form-control",
                     "oninput": "check_tie(this)",
                 }
             ),
             "away_goals": forms.NumberInput(
                 attrs={
-                    "class": "form-control border border-dark",
+                    "class": "form-control",
                     "oninput": "check_tie(this)",
                 }
             ),

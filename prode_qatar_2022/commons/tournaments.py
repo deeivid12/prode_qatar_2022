@@ -1,7 +1,6 @@
 from tournaments.forms import PronosticForm
-from tournaments.models import Game, Pronostic, Room
+from tournaments.models import Game, Pronostic
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.db.models import Sum
 from commons.utils import (
     querydict_to_dict,
@@ -11,7 +10,7 @@ from commons.utils import (
     POINTS_CORRECT_DIFF_RESULT,
     POINTS_INCORRECT_RESULT,
 )
-from datetime import timedelta
+from datetime import datetime
 
 
 def get_penalties_win(form_data):
@@ -24,12 +23,8 @@ def get_penalties_win(form_data):
     Returns:
         list: List with penalties win data
     """
-    all_values = [
-        {k[7:]: v[0]} for k, v in form_data.items() if k.startswith("ko_win_")
-    ]
+    all_values = [{k[7:]: v} for k, v in form_data.items() if k.startswith("ko_win_")]
     penalties = [] if all_values else ["0"] * len(form_data.get("pronostic_game"))
-    if penalties:
-        return penalties
     for game_id in form_data.get("pronostic_game"):
         was_found = False
         for value_dict in all_values:
@@ -67,9 +62,7 @@ def get_all_pronostics_by_user_and_room(user, room):
     Returns:
             list: List of pronostics
     """
-    games = Game.objects.filter(
-        tournament_id=room.tournament_id, played=False
-    ).order_by("date_time")
+    games = Game.objects.filter(tournament_id=room.tournament_id).order_by("date_time")
     pronostics = []
     for game in games:
         pronostic = Pronostic.objects.filter(
@@ -97,7 +90,7 @@ def update_pronostic(pronostic, pronostic_data):
         pronostic.away_goals = pronostic_data.get("away_goals")
         if pronostic.game.is_knockout:
             pronostic.penalties_win = pronostic_data.get("penalties_win")
-        pronostic.last_modified = timezone.now()
+        pronostic.last_modified = datetime.now()
         pronostic.save()
 
 
@@ -110,7 +103,7 @@ def new_pronostic_by_form(pronostic_data):
     form = PronosticForm(pronostic_data)
     if form.is_valid():
         pronostic = form.save(commit=False)
-        pronostic.last_modified = timezone.now()
+        pronostic.last_modified = datetime.now()
         pronostic.save()
     else:
         print(form.errors.as_data())
@@ -120,9 +113,7 @@ def check_pronostics_results():
     """Check pronostics versus games results and it updates status and pronostics points"""
     pronostics = Pronostic.objects.filter(checked=False)
     for pronostic in pronostics:
-        game = Game.objects.filter(id=pronostic.game.id, played=True).first()
-        if not game:
-            continue
+        game = Game.objects.filter(id=pronostic.game.id).first()
         if is_correct_same_result(pronostic, game):
             points = POINTS_CORRECT_SAME_RESULT
         elif is_correct_different_result(pronostic, game):
@@ -150,18 +141,6 @@ def get_ranking_by_room(room_id):
         .order_by("-total")
     )
     ranking = []
-    if len(pronostics_ranking) == 0:
-        users = Room.objects.filter(id=room_id).first().users.all()
-        for idx, user in enumerate(users):
-            position = idx + 1
-            ranking.append(
-                {
-                    "position": position,
-                    "username": user.username,
-                    "total": 0,
-                }
-            )
-        return ranking
     for idx, pronostic in enumerate(pronostics_ranking):
         username = User.objects.filter(id=pronostic.get("user_id")).first().username
         position = idx + 1
@@ -176,4 +155,4 @@ def get_ranking_by_room(room_id):
 
 
 def is_pronostic_in_time(game_datetime):
-    return timezone.now().timestamp() < (game_datetime - timedelta(hours=1)).timestamp()
+    return datetime.now().timestamp() < game_datetime.timestamp()

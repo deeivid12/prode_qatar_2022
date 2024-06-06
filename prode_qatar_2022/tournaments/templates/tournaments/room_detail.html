@@ -6,39 +6,26 @@
 
 {% block content %}
 <div class="row">
-	<div class="col mt-2">
-		<h5>{{room_name}}</h5>
-		<h6>Torneo: {{tournament}}</h5>
-		<h6>Premio: {{grand_prize}}</h5>
-	</div>
-</div>
-<div class="row m-4">
 	<div class="col col-md-6 offset-md-3 ">
-		<div class="list-group border border-dark">
+		<div class="list-group">
 			<a href="{% url 'do_pronostic' room.id %}" class="list-group-item list-group-item-action">
 			<div class="d-flex w-100 justify-content-center">
 				<h5 class="mb-1">Mis Predicciones</h5>
 			</div>
-			<p class="mb-1">Mis Predicciones para {{room.name}}</p>
+			<p class="mb-1">Predicciones para {{room.name}}</p>
 			</a>
-			<a href="{% url 'all_results' room.id %}" class="list-group-item list-group-item-action">
-				<div class="d-flex w-100 justify-content-center">
-					<h5 class="mb-1">Predicciones Participantes</h5>
-				</div>
-				<p class="mb-1">Predicciones de todos los participantes de {{room.name}}</p>
-				</a>
 			<a href="{% url 'ranking' room.id %}" class="list-group-item list-group-item-action">
 				<div class="d-flex w-100 justify-content-center">
 					<h5 class="mb-1">Ranking</h5>
 				</div>
 				<p class="mb-1">Tabla de posiciones para {{room.name}}</p>
 			</a>
-			<!-- <a href="#" class="list-group-item list-group-item-action">
+			<a href="#" class="list-group-item list-group-item-action">
 				<div class="d-flex w-100 justify-content-center">
 					<h5 class="mb-1">Mis Puntos</h5>
 				</div>
 				<p class="mb-1">Puntos obtenidos en cada partido de {{room.name}}</p>
-			</a> -->
+			</a>
 			<a href="{% url 'all_games' %}" class="list-group-item list-group-item-action">
 				<div class="d-flex w-100 justify-content-center">
 					<h5 class="mb-1">Resultados Partidos</h5>
@@ -46,7 +33,6 @@
 				<p class="mb-1">Resultados de partidos de {{room.tournament}}</p>
 			</a>
 	  </div>
-	  <a onclick="history.back()" class="btn btn-dark m-4">Volver</a>
 	</div>
 </div>
 	

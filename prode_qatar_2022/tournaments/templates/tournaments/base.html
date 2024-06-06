@@ -14,7 +14,7 @@
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="{% url 'welcome' %}">ARG 2023</a>
+			<a class="navbar-brand" href="#">Qatar 2022</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02"
 				aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -22,8 +22,8 @@
 			<div class="collapse navbar-collapse" id="navbarColor02">
 				<ul class="navbar-nav me-auto">
 					<li class="nav-item">
-						<a class="nav-link active" href="{% url 'welcome' %}">Inicio
-							<!-- <span class="visually-hidden">(current)</span> -->
+						<a class="nav-link active" href="#">Inicio
+							<span class="visually-hidden">(current)</span>
 						</a>
 					</li>
 					<li class="nav-item">
@@ -37,7 +37,7 @@
 						<a class="nav-link" href="{% url 'check_pronostics' %}">Check Predicciones</a>
 					</li>
 					{% endif %}
-					{% if user.is_authenticated and user.is_staff %}
+					{% if user.is_authenticated %}
 					<li class="nav-item">
 						<a class="nav-link" href="{% url 'new_room' %}">Crear Nueva Sala</a>
 					</li>
@@ -45,8 +45,9 @@
 					{% if user.is_authenticated %}
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
-							aria-haspopup="true" aria-expanded="false">Mi Cuenta: {{user.username|title}}</a>
+							aria-haspopup="true" aria-expanded="false">Mi Cuenta</a>
 						<div class="dropdown-menu">
+							<a class="dropdown-item" href="#">Cambiar Clave</a>
 							<a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesion</a>
 						</div>
 					</li>
