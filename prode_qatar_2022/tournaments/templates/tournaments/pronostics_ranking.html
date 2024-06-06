@@ -6,15 +6,8 @@
 
 {% block content %}
 	<div class="row">
-		<div class="col mt-2 mb-4">
-			<h5>{{room_name}}</h5>
-			<h6>Torneo: {{tournament}}</h5>
-			<h6>Premio: {{grand_prize}}</h5>
-		</div>
-	</div>
-	<div class="row">
 		<div class="col col-md-6 offset-md-3">
-			<table class="table table-dark rounded overflow-hidden">
+			<table class="table table-dark table-hover">
 				<thead>
 					<tr>
 						<th>#</th>
@@ -26,7 +19,7 @@
 				<tbody>
 					<tr>
 						<td>{{pronostic.position}}</td>
-						<td>{{pronostic.username|title}}</td>
+						<td>{{pronostic.username}}</td>
 						<td>{{pronostic.total}}</td>
 					</tr>
 				</tbody>
@@ -34,8 +27,5 @@
 			</table>
 		</div>
 	</div>
-	<div class="row mx-auto">
-		<button onclick="history.back()" class="btn btn-dark col-3 col-md-2 col-lg-1 mx-auto mt-2">Volver</button>
-	</div>
-	</br>	
+		
 {% endblock %}

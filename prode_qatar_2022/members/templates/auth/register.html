@@ -5,39 +5,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-	<div class="col mt-2 mb-4">
-		<h5>Registro</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-8 col-sm-6 col-md-4 col-lg-3 col-xl-2 mx-auto form-group">
-		<form method="post">
+	{% if form.errors %}
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>Error en registro.</strong> Por favor intente nuevamente.
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	{% endif %}
+	<div class="form-group">
+		<form action="{% url 'register' %}" method="post">
 			{% csrf_token %}
-			<!-- Email input -->
-			<div class="form-outline mb-2">
-			  <input type="text" name="username" id="username" required class="form-control mb-2" />
-			  <label class="form-label" for="username">Usuario</label>
-			</div>
-		  
-			<!-- Password input -->
-			<div class="form-outline mb-2">
-			  <input type="password" name="password1" id="id_password1" required class="form-control mb-2" />
-			  <label class="form-label" for="id_password1">Password</label>
+			<table>
+				{{ form }}
+			</table>
 			</br>
-			  <small id="usernameHelpBlock" class="form-text text-muted">
-				Su password debe contener como mínimo 6 caracteres.
-			  </small>
-			</div>
-
-			<div class="form-outline mb-2">
-				<input type="password" name="password2" id="id_password2" required class="form-control mb-2" />
-				<label class="form-label" for="id_password2">Confirmar Password</label>
-			  </div>
-		  
-			<!-- Submit button -->
-			<button type="submit" class="btn btn-dark btn-block mb-4">Registrarse</button>
-		  </form>
+			<button type="submit" class="btn btn-dark">Register</button>
+		</form>
 	</div>
-</div>
 {% endblock %}
