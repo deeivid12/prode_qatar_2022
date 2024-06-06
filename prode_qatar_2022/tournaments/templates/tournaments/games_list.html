@@ -5,39 +5,47 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-	<div class="col mt-2 mb-4">
-		<h5>ARG 2023</h5>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col mt-2 mb-4 text-center">
+			<h5>Partidos</h5>
+		</div>
 	</div>
-</div>
-<div class="row">
-	<div class="col col-md-6 offset-md-3">
-		<table class="table table-dark rounded overflow-hidden">
-			<thead>
-				<tr>
-					<th>Fecha</th>
-					<th>Local</th>
-					<th>Resultado</th>
-					<th>Visitante</th>
-					<th>PK</th>
-					<th>Instancia</th>
-				</tr>
-			</thead>
-			
-			{% for game in games %}
-			<tbody>
-				<tr>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.date_time|date:"d/m/y | H:i" }} hs.</td>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.home_team.fifa_code}}</td>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}Pendiente{% endif %}</td>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.away_team.fifa_code}}</td>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif game.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
-					<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos de Final{% elif game.game_instance == 2 %}Cuartos de Final{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %}</td>
-				</tr>
-			</tbody>
-			{% endfor %}
-		</table>
+	<div class="row">
+		<div class="col-12 col-md-8 offset-md-2">
+			<div class="table-responsive">
+				<table class="table table-dark rounded overflow-hidden">
+					<thead>
+						<tr>
+							<th>Fecha</th>
+							<th>L</th>
+							<th>-</th>
+							<th>V</th>
+							<th>PK</th>
+							<th>Inst</th>
+						</tr>
+					</thead>
+					
+					{% for game in games %}
+					<tbody>
+						<tr>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.date_time|date:"d/m/y H:i"}}</td>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.home_team.fifa_code}}</td>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}-{% endif %}</td>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.away_team.fifa_code}}</td>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif game.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
+							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</td>
+						</tr>
+					</tbody>
+					{% endfor %}
+				</table>
+			</div>
+		</div>
 	</div>
+	<div class="row">
+        <div class="col text-center">
+            <button onclick="history.back()" class="btn btn-dark mt-2">Volver</button>
+        </div>
+    </div>
 </div>
-<button onclick="history.back()" class="btn btn-dark col-2 col-lg-1 mt-2">Volver</button>
 {% endblock %}
