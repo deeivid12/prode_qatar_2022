@@ -1,3 +1,4 @@
+import os
 from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import (
     TeamForm,
@@ -277,6 +278,7 @@ def join_room(request, room_code):
 
 
 def all_results_by_room(request, room_id):
+    MINUTES = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=room_id).first()
     if not room:
@@ -288,7 +290,7 @@ def all_results_by_room(request, room_id):
     users = room.users.all()
     users_ids = [user.id for user in users]
     start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
-    end_date = timezone.now() + timedelta(minutes=55)
+    end_date = timezone.now() + timedelta(minutes=MINUTES-5)
     games_to_show = (
         Game.objects.filter(
             date_time__range=(start_date, end_date),
