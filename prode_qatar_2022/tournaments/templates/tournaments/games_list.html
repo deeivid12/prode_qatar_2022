@@ -8,40 +8,69 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col mt-2 mb-4 text-center">
-			<h5>Partidos</h5>
+			<h3>Partidos del Torneo</h3>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-12 col-md-8 offset-md-2">
-			<div class="table-responsive">
-				<table class="table table-dark rounded overflow-hidden">
+
+	<!-- Mobile View -->
+	<div class="d-md-none">
+		{% for game in games %}
+		<div class="card text-white mb-2 {% if game.played %}bg-secondary{% else %}bg-dark{% endif %}">
+			<div class="card-header p-2">
+				<div class="d-flex justify-content-between align-items-center">
+					<span class="fw-bold small">{{game.home_team}} vs {{game.away_team}}</span>
+					{% if game.played %}
+					<span class="badge bg-light text-dark">{{game.home_goals}}-{{game.away_goals}}</span>
+					{% endif %}
+				</div>
+			</div>
+			<div class="card-body p-2">
+				<div class="d-flex justify-content-between">
+					<small>{{game.date_time|date:"d/m/y H:i"}}</small>
+					<small>{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</small>
+				</div>
+				<div class="text-center pt-1">
+					{% if game.penalties_win > 0 %}
+						<small>Ganador Penales: <strong>{% if game.penalties_win == 1 %}{{game.home_team}}{% elif game.penalties_win == 2 %}{{game.away_team}}{% endif %}</strong></small>
+					{% else %}
+						<small>&nbsp;</small>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+
+	<!-- Desktop View -->
+	<div class="d-none d-md-block">
+		<div class="row justify-content-center">
+			<div class="col-12 col-lg-10 col-xl-8">
+				<table class="table table-dark table-hover rounded overflow-hidden">
 					<thead>
 						<tr>
 							<th>Fecha</th>
-							<th>L</th>
-							<th>-</th>
-							<th>V</th>
-							<th>PK</th>
-							<th>Inst</th>
+							<th>Partido</th>
+							<th class="text-center">Resultado</th>
+							<th>Ganador Penales</th>
+							<th>Fase</th>
 						</tr>
 					</thead>
-					
-					{% for game in games %}
 					<tbody>
+					{% for game in games %}
 						<tr>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.date_time|date:"d/m/y H:i"}}</td>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.home_team.fifa_code}}</td>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}-{% endif %}</td>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{{game.away_team.fifa_code}}</td>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif game.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
-							<td {% if game.played %} class="bg-secondary" {% endif %}>{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</td>
+							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{{game.date_time|date:"d/m/y H:i"}}</td>
+							<td class="align-middle fw-bold{% if game.played %} text-white-50{% endif %}">{{game.home_team}} vs {{game.away_team}}</td>
+							<td class="align-middle text-center fw-bold{% if game.played %} text-white-50{% endif %}">{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}-{% endif %}</td>
+							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{% if game.penalties_win == 1 %}{{game.home_team}}{% elif game.penalties_win == 2 %}{{game.away_team}}{% else %}-{% endif %}</td>
+							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</td>
 						</tr>
-					</tbody>
 					{% endfor %}
+					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
+
 	<div class="row">
         <div class="col text-center">
             <button onclick="history.back()" class="btn btn-dark mt-2">Volver</button>
