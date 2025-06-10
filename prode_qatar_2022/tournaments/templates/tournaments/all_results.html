@@ -6,59 +6,84 @@
 
 {% block content %}
 <div class="row">
-	<div class="col mt-2 mb-4">
-		<h5>Predicciones Participantes</h5>
+	<div class="col mt-2 mb-4 text-center">
+		<h3>Predicciones de los Participantes</h3>
 	</div>
 </div>
-<div class="row">
+<div class="row justify-content-center">
 	{% for game, pronostics in games_pronostics %}
-	<div class="col-12 col-md-8 col-lg-6 offset-md-2 offset-lg-3 accordion" id="accordion{{game.id}}">
-		<div class="accordion-item">
-		  <h2 class="accordion-header" id="headingOne">
-			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{game.id}}" aria-expanded="true" aria-controls="collapse{{game.id}}">
-				{% if game.played %}{{game.home_team}} {{game.home_goals}} - {{game.away_goals}} {{game.away_team}}{% else %}{{game.home_team}} - {{game.away_team}}{% endif %} | {% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos de Final{% elif game.game_instance == 2 %}Cuartos de Final{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %} |{% if game.played %} Finalizado {% else %} Pendiente {% endif %}
-			</button>
-		  </h2>
-		  <div id="collapse{{game.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion{{game.id}}">
-			<div class="accordion-body">
-				<!-- <div class="row">
-					<div class="col-10 col-md-8 col-lg-6 mx-auto"> -->
-						<div class="table-responsive">
-							<table class="table table-dark rounded overflow-hidden">
-								<thead>
-									<tr>
-										<th>Usuario</th>
-										<th>L</th>
-										<th>-</th>
-										<th>V</th>
-										<th>PK</th>
-										<th>Puntos</th>
-									</tr>
-								</thead>
-								{% for pronostic in pronostics %}
-								<tbody>
-									<tr>
-										<td>{{pronostic.user|title}}</td>
-										<td>{{game.home_team.fifa_code}}</td>
-										<td>{{pronostic.home_goals}} - {{pronostic.away_goals}}</td>
-										<td>{{game.away_team.fifa_code}}</td>
-										<td>{% if pronostic.penalties_win == 1 %}{{game.home_team.fifa_code}}{% elif pronostic.penalties_win == 2 %}{{game.away_team.fifa_code}}{% else %}-{% endif %}</td>
-										<td>{% if game.played and pronostic.points is not None %}{{pronostic.points}}{% else %}-{% endif %}</td>
-									</tr>
-								</tbody>
-								{% endfor %}
-							</table>
+	<div class="col-12 col-md-10 col-lg-8 mb-3">
+		<div class="accordion" id="accordion{{game.id}}">
+			<div class="accordion-item bg-dark">
+				<h2 class="accordion-header" id="headingOne">
+					<button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{game.id}}" aria-expanded="true" aria-controls="collapse{{game.id}}">
+						<div class="w-100 d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center pe-2">
+							<div class="fw-bold">
+								<span>{{game.home_team}} - {{game.away_team}}</span>
+								{% if game.played %}
+								<span class="badge bg-light text-dark ms-2">{{game.home_goals}} - {{game.away_goals}}</span>
+								{% endif %}
+							</div>
+							<div class="mt-2 mt-sm-0">
+								<span class="badge bg-primary">{% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos{% elif game.game_instance == 2 %}Cuartos{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %}</span>
+								<span class="badge {% if game.played %}bg-success{% else %}bg-warning text-dark{% endif %} ms-1">{% if game.played %}Finalizado{% else %}Pendiente{% endif %}</span>
+							</div>
 						</div>
-					<!-- </div>
-				</div> -->
+					</button>
+				</h2>
+				<div id="collapse{{game.id}}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordion{{game.id}}">
+					<div class="accordion-body">
+						<!-- Mobile View -->
+						<div class="d-md-none">
+							{% for pronostic in pronostics %}
+							<div class="card bg-secondary text-white mb-2">
+								<div class="card-body">
+									<div class="d-flex justify-content-between align-items-center">
+										<span class="fw-bold">{{pronostic.user|title}}</span>
+										<span class="badge bg-light text-dark fs-6">{{pronostic.home_goals}} - {{pronostic.away_goals}}</span>
+									</div>
+									<div class="d-flex justify-content-between align-items-center mt-2">
+										<small>Penales: <strong>{% if pronostic.penalties_win == 1 %}{{game.home_team}}{% elif pronostic.penalties_win == 2 %}{{game.away_team}}{% else %}-{% endif %}</strong></small>
+										<small>Puntos: <strong class="fs-6">{% if game.played and pronostic.points is not None %}{{pronostic.points}}{% else %}-{% endif %}</strong></small>
+									</div>
+								</div>
+							</div>
+							{% endfor %}
+						</div>
+						<!-- Desktop View -->
+						<div class="d-none d-md-block">
+							<div class="table-responsive">
+								<table class="table table-dark table-hover rounded overflow-hidden">
+									<thead>
+										<tr>
+											<th>Usuario</th>
+											<th class="text-center">Predicción</th>
+											<th>Ganador por Penales</th>
+											<th class="text-center">Puntos</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for pronostic in pronostics %}
+										<tr>
+											<td class="align-middle">{{pronostic.user|title}}</td>
+											<td class="text-center align-middle">{{pronostic.home_goals}} - {{pronostic.away_goals}}</td>
+											<td class="align-middle">{% if pronostic.penalties_win == 1 %}{{game.home_team.name}}{% elif pronostic.penalties_win == 2 %}{{game.away_team.name}}{% else %}-{% endif %}</td>
+											<td class="text-center align-middle fw-bold">{% if game.played and pronostic.points is not None %}{{pronostic.points}}{% else %}-{% endif %}</td>
+										</tr>
+									{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-		  </div>
 		</div>
 	</div>
 	{% endfor %}
 </div>
 <div class="row mx-auto">
-	<button onclick="history.back()" class="btn btn-dark col-3 col-md-2 col-lg-1 mx-auto mt-2">Volver</button>
+	<button onclick="history.back()" class="btn btn-dark col-6 col-sm-4 col-md-3 col-lg-2 mx-auto mt-2">Volver</button>
 </div>
 </br>	
 {% endblock %}
