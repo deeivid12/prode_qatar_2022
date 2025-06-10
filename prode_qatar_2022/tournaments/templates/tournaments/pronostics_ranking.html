@@ -6,36 +6,72 @@
 
 {% block content %}
 	<div class="row">
-		<div class="col mt-2 mb-4">
-			<h5>{{room_name}}</h5>
-			<h6>Torneo: {{tournament}}</h5>
-			<h6>Premio: {{grand_prize}}</h5>
+		<div class="col mt-2 mb-4 text-center">
+			<h3>{{room_name}}</h3>
+			<h6>Torneo: {{tournament}}</h6>
+			<p class="mb-0">Premio: {{grand_prize}}</p>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col col-md-6 offset-md-3">
-			<table class="table table-dark rounded overflow-hidden">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Usuario</th>
-						<th>Puntos</th>
-					</tr>
-				</thead>
-			{% for pronostic in pronostics_ranking %}
-				<tbody>
-					<tr>
-						<td>{{pronostic.position}}</td>
-						<td>{{pronostic.username|title}}</td>
-						<td>{{pronostic.total}}</td>
-					</tr>
-				</tbody>
-			{% endfor %}
-			</table>
+
+	<div class="row justify-content-center">
+		<div class="col-12 col-md-8 col-lg-6">
+			<!-- Mobile View -->
+			<div class="d-md-none">
+				{% for pronostic in pronostics_ranking %}
+				<div class="card bg-dark text-white mb-2">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center">
+							<div>
+								<h5 class="mb-0 d-inline">
+									#{{ pronostic.position }}
+									{% if pronostic.position == 1 %}🏆{% elif pronostic.position == 2 %}🥈{% elif pronostic.position == 3 %}🥉{% endif %}
+								</h5>
+								<h5 class="mb-0 d-inline ms-2">{{ pronostic.username|title }}</h5>
+							</div>
+							<span class="badge bg-light text-dark fs-6">{{ pronostic.total }}</span>
+						</div>
+						<hr class="my-2" style="color: white;">
+						<div class="d-flex justify-content-around">
+							<div><small>Plenos 🎯: {{ pronostic.exact_result }}</small></div>
+							<div><small>Parciales ✅: {{ pronostic.partial_result }}</small></div>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+
+			<!-- Desktop View -->
+			<div class="d-none d-md-block">
+				<table class="table table-dark table-hover rounded overflow-hidden">
+					<thead>
+						<tr>
+							<th class="text-center">#</th>
+							<th></th>
+							<th>Usuario</th>
+							<th class="text-center">Puntos</th>
+							<th class="text-center">Plenos 🎯</th>
+							<th class="text-center">Parciales ✅</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for pronostic in pronostics_ranking %}
+						<tr>
+							<td class="text-center align-middle fw-bold">{{pronostic.position}}</td>
+							<td class="align-middle fs-5">{% if pronostic.position == 1 %}🏆{% elif pronostic.position == 2  %}🥈{% elif pronostic.position == 3  %}🥉{% endif %}</td>
+							<td class="align-middle">{{pronostic.username|title}}</td>
+							<td class="text-center align-middle fw-bold">{{pronostic.total}}</td>
+							<td class="text-center align-middle">{{pronostic.exact_result}}</td>
+							<td class="text-center align-middle">{{pronostic.partial_result}}</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
+
 	<div class="row mx-auto">
-		<button onclick="history.back()" class="btn btn-dark col-3 col-md-2 col-lg-1 mx-auto mt-2">Volver</button>
+		<button onclick="history.back()" class="btn btn-dark col-6 col-sm-4 col-md-3 col-lg-2 mx-auto mt-2">Volver</button>
 	</div>
 	</br>	
 {% endblock %}

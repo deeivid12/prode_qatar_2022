@@ -23,7 +23,7 @@ from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Count, Case, When, IntegerField
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
@@ -210,11 +210,23 @@ def get_ranking(request, room_id):
         Pronostic.objects
         .filter(game__tournament_id=tournament_id, user_id__in=users_ids)
         .values(username=F('user__username'))
-        .annotate(total=Sum('points', default=0))
-        .order_by('-total')
+        .annotate(
+            total=Sum('points', default=0),
+            exact_result=Count(
+            Case(
+                When(points=5, then=1),
+                output_field=IntegerField()
+            )),
+            partial_result=Count(
+            Case(
+                When(points=3, then=1),
+                output_field=IntegerField()
+            )
+        )
+        )
+        .order_by('-total', '-exact_result', '-partial_result')
     )
-    ranking = sorted(pronostics_data, key=lambda x: x['total'] or 0, reverse=True)
-    ranking = [{'position': idx + 1, **item} for idx, item in enumerate(ranking)]
+    ranking = [{'position': idx + 1, **item} for idx, item in enumerate(pronostics_data)]
     data = {
         "pronostics_ranking": ranking,
         "room_name": room.name,
