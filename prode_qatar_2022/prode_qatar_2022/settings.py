@@ -176,5 +176,6 @@ if not DEBUG:
 # Content Security Policy
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
 CSP_OBJECT_SRC = ("'none'",)
+CSP_IMG_SRC = ("'self'", "data:")
