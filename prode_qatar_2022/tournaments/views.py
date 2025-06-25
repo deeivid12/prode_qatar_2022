@@ -291,6 +291,9 @@ def join_room(request, room_code):
 
 def all_results_by_room(request, room_id):
     MINUTES = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
+    START_DATE = str(os.environ.get("START_DATE_TO_SHOW_PREDICTIONS", "2025-01-01"))
+    dt_naive = datetime.strptime(START_DATE, "%Y-%m-%d")
+
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=room_id).first()
     if not room:
@@ -301,7 +304,7 @@ def all_results_by_room(request, room_id):
         redirect("welcome")
     users = room.users.all()
     users_ids = [user.id for user in users]
-    start_date = make_aware(datetime(2022, 11, 20), timezone=timezone.utc)
+    start_date = make_aware(dt_naive, timezone=timezone.utc)
     end_date = timezone.now() + timedelta(minutes=MINUTES-5)
     games_to_show = (
         Game.objects.filter(
