@@ -4,14 +4,12 @@ from tournaments.forms import (
     TeamForm,
     TournamentForm,
     GameForm,
-    PronosticForm,
     RoomForm,
 )
 from commons.tournaments import (
     get_all_pronostics_by_user,
     update_pronostic,
     new_pronostic_by_form,
-    get_do_pronostic_data,
     check_pronostics_results,
     get_ranking_by_room,
     is_pronostic_in_time,
@@ -105,47 +103,75 @@ def do_pronostic(request, room_id):
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=room_id).first()
     if request.method == "POST":
-        num_games = Game.objects.filter(
+        games = Game.objects.filter(
             tournament_id=room.tournament_id, played=False
-        ).count()
-        form_data = get_do_pronostic_data(request.POST)
-        for num in range(num_games):
+        )
+        had_incomplete = False
+        had_knockout_penalties_error = False
+        for game in games:
+            home_raw = request.POST.get(f"home_goals_{game.id}", "").strip()
+            away_raw = request.POST.get(f"away_goals_{game.id}", "").strip()
+
+            if not home_raw and not away_raw:
+                continue
+            if (home_raw and not away_raw) or (not home_raw and away_raw):
+                had_incomplete = True
+                continue
+
+            if not is_pronostic_in_time(game.date_time):
+                game_already_played = True
+                continue
+
+            home_goals = int(home_raw)
+            away_goals = int(away_raw)
+            penalties_win = int(request.POST.get(f"ko_win_{game.id}", "0"))
+
+            if game.is_knockout:
+                if home_goals == away_goals:
+                    if penalties_win not in (1, 2):
+                        had_knockout_penalties_error = True
+                        continue
+                else:
+                    penalties_win = 0
+
             pronostic_data = {
-                "game": int(form_data.get("pronostic_game")[num]),
-                "home_goals": int(form_data.get("home_goals")[num]),
-                "away_goals": int(form_data.get("away_goals")[num]),
-                "penalties_win": int(form_data.get("penalties_win")[num]),
+                "game": game.id,
+                "home_goals": home_goals,
+                "away_goals": away_goals,
+                "penalties_win": penalties_win,
                 "user": current_user,
             }
             pronostic = Pronostic.objects.filter(
-                game_id=pronostic_data.get("game"),
+                game_id=game.id,
                 user_id=current_user.id,
             ).first()
-            # enviar mensaje de error en dicho caso
             if pronostic:
-                if pronostic.game.played or pronostic.checked or not is_pronostic_in_time(pronostic.game.date_time):
+                if pronostic.checked:
                     game_already_played = True
                     continue
                 update_pronostic(pronostic, pronostic_data)
             else:
-                game = Game.objects.filter(id=pronostic_data.get("game")).first()
-                if game and is_pronostic_in_time(game.date_time):
-                    new_pronostic_by_form(pronostic_data)
-                else:
-                    game_already_played = True
-                    continue
-        if game_already_played or not num_games:
+                new_pronostic_by_form(pronostic_data)
+        if game_already_played or not games.exists():
             messages.warning(
                 request,
                 "Hay pronósticos que no se actualizaron porque los partidos ya se jugaron.",
             )
+        if had_incomplete:
+            messages.warning(
+                request,
+                "Algunos partidos tienen solo un gol cargado. Completá ambos goles o dejá ambos vacíos para no guardar ese pronóstico.",
+            )
+        if had_knockout_penalties_error:
+            messages.warning(
+                request,
+                "En llaves, si pronosticás empate, elegí el ganador por penales.",
+            )
         return redirect("do_pronostic", room_id=room_id)
     else:
         pronostics = get_all_pronostics_by_user(current_user, room)
-        forms = [PronosticForm(instance=pronostic) for pronostic in pronostics]
-        # forms and games have the same size
         data = {
-            "forms_pronostics": zip(forms, pronostics),
+            "pronostics": pronostics,
             "title": "Realizar Pronosticos",
             "room_name": room.name,
             "tournament": room.tournament.name,
@@ -224,9 +250,25 @@ def get_ranking(request, room_id):
             )
         )
         )
-        .order_by('-total', '-exact_result', '-partial_result')
     )
-    ranking = [{'position': idx + 1, **item} for idx, item in enumerate(pronostics_data)]
+    by_username = {row["username"]: row for row in pronostics_data}
+    merged = []
+    for user in users:
+        merged.append(
+            by_username.get(
+                user.username,
+                {
+                    "username": user.username,
+                    "total": 0,
+                    "exact_result": 0,
+                    "partial_result": 0,
+                },
+            )
+        )
+    merged.sort(
+        key=lambda r: (-r["total"], -r["exact_result"], -r["partial_result"])
+    )
+    ranking = [{"position": idx + 1, **item} for idx, item in enumerate(merged)]
     data = {
         "pronostics_ranking": ranking,
         "room_name": room.name,

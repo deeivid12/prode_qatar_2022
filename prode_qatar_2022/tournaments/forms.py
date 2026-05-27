@@ -48,15 +48,27 @@ class PronosticForm(forms.ModelForm):
                 attrs={
                     "class": "form-control border border-dark",
                     "oninput": "check_tie(this)",
+                    "min": "0",
+                    "placeholder": "-",
                 }
             ),
             "away_goals": forms.NumberInput(
                 attrs={
                     "class": "form-control border border-dark",
                     "oninput": "check_tie(this)",
+                    "min": "0",
+                    "placeholder": "-",
                 }
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["home_goals"].required = False
+        self.fields["away_goals"].required = False
+        if not self.instance.pk:
+            self.initial["home_goals"] = None
+            self.initial["away_goals"] = None
 
 
 class GameAdminForm(forms.ModelForm):

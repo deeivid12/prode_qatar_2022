@@ -16,15 +16,13 @@
 <div class="row">
   <div class="col col-md-8 col-lg-6 offset-md-2 offset-lg-3">
     <form method="post">
-      {% for form, pronostic in forms_pronostics %}
+      {% for pronostic in pronostics %}
         {% csrf_token %}
-        <div class="card text-center m-4 border border-dark">
+        <div class="card text-center m-4 border border-dark" data-game-id="{{pronostic.game.id}}" data-played="{{pronostic.game.played}}">
           <div class="card-header text-white bg-dark">
-            <input type="hidden" id={{pronostic.game.id}} value={{pronostic.game.id}} name="pronostic_game">
             {{pronostic.game.date_time|date:"d/m/y - H:i" }}hs. | {% if pronostic.game.played %} Partido Finalizado {% else %} Partido por disputarse {% endif %}
           </div>
           <div class="card-body">
-            <div><input type="hidden" name="played" played={{pronostic.game.played}} value={{pronostic.game.played}}></div>
             <h6 class="card-title">{% if pronostic.game.game_instance == 0 %}Fase de Grupos{% elif pronostic.game.game_instance == 1 %}Octavos de Final{% elif pronostic.game.game_instance == 2 %}Cuartos de Final{% elif pronostic.game.game_instance == 3 %}Semifinal{% elif pronostic.game.game_instance == 4 %}Final{% endif %}</h6>
             
             <div class="row align-items-center">
@@ -34,9 +32,13 @@
             </div>
 
             <div class="row align-items-center mt-2 justify-content-center">
-                <div class="col-4 p-0" {% if pronostic.game.played %} disabled {% endif %}>{{form.home_goals}}</div>
+                <div class="col-4 p-0">
+                    <input type="number" name="home_goals_{{pronostic.game.id}}" value="{% if pronostic.pk %}{{pronostic.home_goals}}{% endif %}" class="form-control border border-dark" min="0" placeholder="-" oninput="check_tie(this)">
+                </div>
                 <div class="col-1 p-0">-</div>
-                <div class="col-4 p-0">{{form.away_goals}}</div>
+                <div class="col-4 p-0">
+                    <input type="number" name="away_goals_{{pronostic.game.id}}" value="{% if pronostic.pk %}{{pronostic.away_goals}}{% endif %}" class="form-control border border-dark" min="0" placeholder="-" oninput="check_tie(this)">
+                </div>
             </div>
             
             {% if pronostic.game.is_knockout %}
@@ -49,10 +51,10 @@
                         <label for="ko_win_{{pronostic.game.id}}_1" class="w-100">{{pronostic.game.home_team.fifa_code}}</label>
                     </div>
                     <div class="col-1 text-center">
-                        <input class="form-check-input" required id="ko_win_{{pronostic.game.id}}_1" type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>
+                        <input class="form-check-input" id="ko_win_{{pronostic.game.id}}_1" type="radio" name="ko_win_{{pronostic.game.id}}" value=1 {% if pronostic.penalties_win == 1 %} checked {% endif %}/>
                     </div>
                     <div class="col-1 text-center">
-                        <input class="form-check-input" required id="ko_win_{{pronostic.game.id}}_2" type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>
+                        <input class="form-check-input" id="ko_win_{{pronostic.game.id}}_2" type="radio" name="ko_win_{{pronostic.game.id}}" value=2 {% if pronostic.penalties_win == 2 %} checked {% endif %}/>
                     </div>
                      <div class="col-5 text-start">
                         <label for="ko_win_{{pronostic.game.id}}_2" class="w-100">{{pronostic.game.away_team.fifa_code}}</label>
@@ -60,7 +62,7 @@
                 </div>
             </div>
             {% endif %}
-            <p class="card-text mt-3">Pronóstico modificado: {{pronostic.last_modified|date:"d/m/y - H:i"}}hs.</p>
+            <p class="card-text mt-3">Pronóstico modificado: {% if pronostic.pk %}{{pronostic.last_modified|date:"d/m/y - H:i"}}hs.{% else %}Sin guardar{% endif %}</p>
           </div>
           <div class="card-footer text-white bg-dark">
             Resultado: {% if pronostic.game.played %}{{pronostic.game.home_goals}}-{{pronostic.game.away_goals}}{% else %}Pendiente{% endif %} | Puntos: {% if pronostic.points >= 0 %} {{pronostic.points}} {% else %} Pendiente {% endif %}

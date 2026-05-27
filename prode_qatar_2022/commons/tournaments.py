@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.db import transaction
 from django.db.models import Sum
 from commons.utils import (
-    querydict_to_dict,
     is_correct_same_result,
     is_correct_different_result,
     POINTS_CORRECT_SAME_RESULT,
@@ -14,49 +13,6 @@ from commons.utils import (
     POINTS_INCORRECT_RESULT,
 )
 from datetime import timedelta
-
-
-def get_penalties_win(form_data):
-    """It takes 'penalties win' data from form and it converts it the way
-    you can have a list with this information
-
-    Args:
-        form_data (dict): Data from form
-
-    Returns:
-        list: List with penalties win data
-    """
-    all_values = [
-        {k[7:]: v[0]} for k, v in form_data.items() if k.startswith("ko_win_")
-    ]
-    penalties = [] if all_values else ["0"] * len(form_data.get("pronostic_game"))
-    if penalties:
-        return penalties
-    for game_id in form_data.get("pronostic_game"):
-        was_found = False
-        for value_dict in all_values:
-            if value_dict.get(game_id):
-                penalties.append(value_dict.get(game_id))
-                was_found = True
-                break
-        if not was_found:
-            penalties.append("0")
-    return penalties
-
-
-def get_do_pronostic_data(request_data):
-    """It takes sent data and it processes it to return it clean and ready to work
-
-    Args:
-            request_data (query dict dictionary): Request data from POST
-
-    Returns:
-            dict: Clean and ready data to work
-    """
-    data = querydict_to_dict(request_data)
-    penalties_data = get_penalties_win(data)
-    data["penalties_win"] = penalties_data
-    return data
 
 
 def get_all_pronostics_by_user(user, room):

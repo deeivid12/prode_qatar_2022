@@ -12,21 +12,6 @@ def indexes(iterable, obj):
     return (index for index, elem in enumerate(iterable) if elem == obj)
 
 
-def querydict_to_dict(query_dict):
-    data = {k: v for k, v in query_dict.lists()}
-    played_data = data["played"][:]
-    pronostic_game_data = data["pronostic_game"][:]
-    played = []
-    pronostic_game = []
-    for index, value in enumerate(played_data):
-        if value == "False":
-            played.append(value)
-            pronostic_game.append(pronostic_game_data[index])
-    data["played"] = played
-    data["pronostic_game"] = pronostic_game
-    return data
-
-
 def is_correct_same_result(pronostic, game):
     result = (pronostic.home_goals, pronostic.away_goals) == (
         game.home_goals,
