@@ -261,6 +261,31 @@ def test_update_world_cup_results_extra_time_score(
 
 
 @pytest.mark.django_db
+def test_update_world_cup_results_respects_locked_game(
+    world_cup_tournament, world_cup_teams_for_matches
+):
+    game = Game.objects.create(
+        external_id=999003,
+        home_team_id=Team.objects.get(external_id=769).id,
+        away_team_id=Team.objects.get(external_id=774).id,
+        tournament=world_cup_tournament,
+        date_time="2026-07-03T19:00:00Z",
+        home_goals=0,
+        away_goals=0,
+        result_locked=True,
+        result_locked_reason="Dato manual validado",
+    )
+    payload = load_world_cup_matches_file(FINISHED_FIXTURE)
+    result = update_world_cup_results(payload)
+
+    game.refresh_from_db()
+    assert game.home_goals == 0
+    assert game.away_goals == 0
+    assert game.played is False
+    assert 999003 in result["skipped_locked"]
+
+
+@pytest.mark.django_db
 def test_update_world_cup_results_skips_non_finished(
     world_cup_tournament, world_cup_teams_for_matches
 ):

@@ -42,3 +42,10 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"  Finalizados sin marcador en JSON: {result['skipped_no_score']}"
             )
+        if result["skipped_locked"]:
+            self.stdout.write(
+                self.style.WARNING(
+                    "  Omitidos por bloqueo manual en DB: "
+                    f"{result['skipped_locked']}"
+                )
+            )

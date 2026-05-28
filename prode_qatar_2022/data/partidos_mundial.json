@@ -350,7 +350,7 @@
             },
             "id": 537339,
             "utcDate": "2026-06-13T22:00:00Z",
-            "status": "TIMED",
+            "status": "FINISHED",
             "matchday": 1,
             "stage": "GROUP_STAGE",
             "group": "GROUP_C",
@@ -370,11 +370,11 @@
                 "crest": "https://crests.football-data.org/morocco.svg"
             },
             "score": {
-                "winner": null,
+                "winner": "HOME_TEAM",
                 "duration": "REGULAR",
                 "fullTime": {
-                    "home": null,
-                    "away": null
+                    "home": 5,
+                    "away": 0
                 },
                 "halfTime": {
                     "home": null,

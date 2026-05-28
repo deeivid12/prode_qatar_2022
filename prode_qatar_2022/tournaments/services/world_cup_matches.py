@@ -119,6 +119,7 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
     skipped_not_finished = 0
     skipped_no_score = []
     skipped_not_in_db = []
+    skipped_locked = []
 
     with transaction.atomic():
         for match in payload.matches:
@@ -135,6 +136,9 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
             game = Game.objects.filter(external_id=match.id).first()
             if not game:
                 skipped_not_in_db.append(match.id)
+                continue
+            if game.result_locked:
+                skipped_locked.append(match.id)
                 continue
 
             if apply_match_result_to_game(game, match):
@@ -155,6 +159,7 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
         "skipped_not_finished": skipped_not_finished,
         "skipped_no_score": skipped_no_score,
         "skipped_not_in_db": skipped_not_in_db,
+        "skipped_locked": skipped_locked,
     }
 
 

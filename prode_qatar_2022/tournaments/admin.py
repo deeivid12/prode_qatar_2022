@@ -13,7 +13,15 @@ class GameAdmin(admin.ModelAdmin):
             'fields': ('home_team', 'away_team')
         }),
         ('Match Details', {
-            'fields': ('is_knockout', 'penalties_win', 'home_goals', 'away_goals', 'played')
+            'fields': (
+                'is_knockout',
+                'penalties_win',
+                'home_goals',
+                'away_goals',
+                'played',
+                'result_locked',
+                'result_locked_reason',
+            )
         }),
     )
 
@@ -26,8 +34,11 @@ class GameAdmin(admin.ModelAdmin):
         'is_knockout',
         'penalties_win',
         'date_time',
-        'played'
+        'played',
+        'result_locked',
+        'result_locked_reason',
     )
+    list_filter = ('tournament', 'game_instance', 'played', 'is_knockout', 'result_locked')
 
     @admin.display(description='Match')
     def get_game_display(self, obj):

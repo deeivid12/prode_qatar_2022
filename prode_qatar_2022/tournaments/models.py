@@ -70,6 +70,16 @@ class Game(models.Model):
         db_index=True,
         help_text="ID del partido en football-data.org",
     )
+    result_locked = models.BooleanField(
+        default=False,
+        help_text="Si es True, el sync externo no pisa el resultado cargado en DB.",
+    )
+    result_locked_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="Motivo del bloqueo manual del resultado.",
+    )
     played = models.BooleanField(default=False)
     game_instance = models.PositiveSmallIntegerField(
         default=0, choices=game_instance_options
