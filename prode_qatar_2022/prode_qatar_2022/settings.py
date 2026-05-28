@@ -48,11 +48,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "whitenoise.runserver_nostatic",
     "tournaments",
     "members",
     "corsheaders",
     "csp",
+    "allauth",
+    "allauth.account",
 ]
 
 MIDDLEWARE = [
@@ -66,6 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "prode_qatar_2022.urls"
@@ -180,3 +184,33 @@ CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
 CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
 CSP_OBJECT_SRC = ("'none'",)
 CSP_IMG_SRC = ("'self'", "data:")
+
+# django-allauth
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+
+LOGIN_URL = "account_login"
+LOGIN_REDIRECT_URL = "welcome"
+
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@prode25.com"
+
+# Mundial (football-data.org) — JSON local de equipos
+WORLD_CUP_TEAMS_JSON = env(
+    "WORLD_CUP_TEAMS_JSON",
+    default=str(BASE_DIR / "data" / "equipos_mundial.json"),
+)
+WORLD_CUP_MATCHES_JSON = env(
+    "WORLD_CUP_MATCHES_JSON",
+    default=str(BASE_DIR / "data" / "partidos_mundial.json"),
+)
+WORLD_CUP_TOURNAMENT_NAME = env("WORLD_CUP_TOURNAMENT_NAME", default="Mundial 2026")

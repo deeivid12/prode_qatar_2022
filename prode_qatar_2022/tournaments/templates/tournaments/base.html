@@ -47,13 +47,13 @@
 						<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
 							aria-haspopup="true" aria-expanded="false">Mi Cuenta: {{user.username|title}}</a>
 						<div class="dropdown-menu">
-							<a class="dropdown-item" href="{% url 'change_password' %}">Cambiar Password</a>
-							<a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesion</a>
+							<a class="dropdown-item" href="{% url 'account_change_password' %}">Cambiar Password</a>
+							<a class="dropdown-item" href="{% url 'account_logout' %}">Cerrar Sesion</a>
 						</div>
 					</li>
 					{% else %}
 					<li class="nav-item">
-						<a class="nav-link" href="{% url 'login' %}">Login</a>
+						<a class="nav-link" href="{% url 'account_login' %}">Login</a>
 					</li>
 					{% endif %}
 				</ul>

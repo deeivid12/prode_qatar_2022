@@ -1,0 +1,18 @@
+{% extends 'tournaments/base.html' %}
+
+{% block title %}
+<title>Confirmar Email</title>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="col mt-2 mb-4">
+		<h5>Confirmar Email</h5>
+		<form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+			{% csrf_token %}
+			<p>¿Confirmar el email <strong>{{ confirmation.email_address.email }}</strong>?</p>
+			<button type="submit" class="btn btn-dark">Confirmar</button>
+		</form>
+	</div>
+</div>
+{% endblock %}

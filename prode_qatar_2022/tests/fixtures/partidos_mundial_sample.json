@@ -1,0 +1,54 @@
+{
+    "filters": {"season": "2026"},
+    "resultSet": {"count": 2, "first": "2026-06-11", "last": "2026-07-19", "played": 0},
+    "competition": {
+        "id": 2000,
+        "name": "FIFA World Cup",
+        "code": "WC",
+        "type": "CUP",
+        "emblem": "https://example.com/wm26.png"
+    },
+    "matches": [
+        {
+            "area": {"id": 2267, "name": "World", "code": "INT", "flag": null},
+            "competition": {"id": 2000, "name": "FIFA World Cup", "code": "WC", "type": "CUP", "emblem": "https://example.com/wm26.png"},
+            "season": {"id": 2398, "startDate": "2026-06-11", "endDate": "2026-07-19", "currentMatchday": 1, "winner": null},
+            "id": 537327,
+            "utcDate": "2026-06-11T19:00:00Z",
+            "status": "TIMED",
+            "matchday": 1,
+            "stage": "GROUP_STAGE",
+            "group": "GROUP_A",
+            "lastUpdated": "2025-12-06T20:20:44Z",
+            "homeTeam": {"id": 769, "name": "Mexico", "shortName": "Mexico", "tla": "MEX", "crest": "https://example.com/769.svg"},
+            "awayTeam": {"id": 774, "name": "South Africa", "shortName": "South Africa", "tla": "RSA", "crest": "https://example.com/774.svg"},
+            "score": {
+                "winner": null,
+                "duration": "REGULAR",
+                "fullTime": {"home": null, "away": null},
+                "halfTime": {"home": null, "away": null}
+            },
+            "odds": {"msg": "ignored"},
+            "referees": []
+        },
+        {
+            "area": {"id": 2267, "name": "World", "code": "INT", "flag": null},
+            "id": 537385,
+            "utcDate": "2026-07-11T21:00:00Z",
+            "status": "TIMED",
+            "matchday": null,
+            "stage": "QUARTER_FINALS",
+            "group": null,
+            "homeTeam": {"id": null, "name": null, "shortName": null, "tla": null, "crest": null},
+            "awayTeam": {"id": null, "name": null, "shortName": null, "tla": null, "crest": null},
+            "score": {
+                "winner": null,
+                "duration": "REGULAR",
+                "fullTime": {"home": null, "away": null},
+                "halfTime": {"home": null, "away": null}
+            },
+            "odds": {"msg": "ignored"},
+            "referees": []
+        }
+    ]
+}

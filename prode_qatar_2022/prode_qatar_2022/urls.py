@@ -30,7 +30,10 @@ from tournaments.views import (
     welcome,
     join_room,
     all_results_by_room,
-    bulk_creation
+    bulk_creation,
+    world_cup_teams,
+    world_cup_teams_sync,
+    world_cup_matches,
 )
 
 urlpatterns = [
@@ -53,9 +56,15 @@ urlpatterns = [
         all_results_by_room,
         name="all_results",
     ),
+    path("api/world-cup/teams", world_cup_teams, name="world_cup_teams"),
+    path(
+        "api/world-cup/teams/sync",
+        world_cup_teams_sync,
+        name="world_cup_teams_sync",
+    ),
+    path("api/world-cup/matches", world_cup_matches, name="world_cup_matches"),
     path("check_pronostics", check_pronostics, name="check_pronostics"),
     path("get_points", get_points, name="get_points"),
     path("<str:model>/bulk-creation", bulk_creation, name="bulk_creation"),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("accounts/", include("members.urls")),
+    path("accounts/", include("allauth.urls")),
 ]

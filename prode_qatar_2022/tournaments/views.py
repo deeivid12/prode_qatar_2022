@@ -22,8 +22,21 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum, F, Count, Case, When, IntegerField
+from django.conf import settings
 from django.http import JsonResponse
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+from pydantic import ValidationError
+from tournaments.services.world_cup_matches import (
+    load_world_cup_matches_file,
+    matches_to_public_payload,
+)
+from tournaments.services.world_cup_teams import (
+    load_world_cup_teams_file,
+    sync_teams_from_world_cup,
+    teams_to_public_payload,
+)
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from datetime import datetime, timedelta
@@ -96,7 +109,7 @@ def get_games_list(request):
     return render(request, "tournaments/games_list.html", data)
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def do_pronostic(request, room_id):
     # need to be authenticated, otherwise it won't work
     game_already_played = False
@@ -194,7 +207,7 @@ def get_points(request):
     return redirect("all_games")
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def get_ranking_2(request, room_id):
     """This is a deprecated function."""
 
@@ -217,7 +230,7 @@ def get_ranking_2(request, room_id):
     return render(request, "tournaments/pronostics_ranking.html", data)
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def get_ranking(request, room_id):
     current_user = request.user
     user_rooms_ids = (
@@ -278,7 +291,7 @@ def get_ranking(request, room_id):
     return render(request, "tournaments/pronostics_ranking.html", data)
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def get_rooms_list_by_user(request):
     current_user = request.user
     rooms = current_user.tournaments_rooms.all()
@@ -286,7 +299,7 @@ def get_rooms_list_by_user(request):
     return render(request, "tournaments/rooms_list.html", data)
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def get_room(request, id):
     current_user = request.user
     room = current_user.tournaments_rooms.filter(id=id).first()
@@ -299,13 +312,13 @@ def get_room(request, id):
     return render(request, "tournaments/room_detail.html", data)
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def welcome(request):
     current_user = request.user
     return render(request, "tournaments/welcome.html")
 
 
-@login_required(login_url="login")
+@login_required(login_url="account_login")
 def join_room(request, room_code):
     current_user = request.user
     room = Room.objects.filter(room_code=room_code).first()
@@ -362,6 +375,62 @@ def all_results_by_room(request, room_id):
         all_pronostics.append(pronostics_by_game)
     data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)
+
+
+@require_GET
+def world_cup_teams(request):
+    try:
+        payload = load_world_cup_teams_file(settings.WORLD_CUP_TEAMS_JSON)
+    except FileNotFoundError:
+        return JsonResponse(
+            {"error": "Archivo de equipos no encontrado"},
+            status=404,
+        )
+    except ValidationError as exc:
+        return JsonResponse(
+            {"error": "JSON inválido", "details": exc.errors()},
+            status=500,
+        )
+    teams = teams_to_public_payload(payload.teams)
+    return JsonResponse({"count": len(teams), "teams": teams})
+
+
+@require_GET
+def world_cup_matches(request):
+    try:
+        payload = load_world_cup_matches_file(settings.WORLD_CUP_MATCHES_JSON)
+    except FileNotFoundError:
+        return JsonResponse(
+            {"error": "Archivo de partidos no encontrado"},
+            status=404,
+        )
+    except ValidationError as exc:
+        return JsonResponse(
+            {"error": "JSON inválido", "details": exc.errors()},
+            status=500,
+        )
+    matches = matches_to_public_payload(payload.matches)
+    return JsonResponse({"count": len(matches), "matches": matches})
+
+
+@csrf_exempt
+@require_POST
+@staff_member_required
+def world_cup_teams_sync(request):
+    try:
+        payload = load_world_cup_teams_file(settings.WORLD_CUP_TEAMS_JSON)
+    except FileNotFoundError:
+        return JsonResponse(
+            {"error": "Archivo de equipos no encontrado"},
+            status=404,
+        )
+    except ValidationError as exc:
+        return JsonResponse(
+            {"error": "JSON inválido", "details": exc.errors()},
+            status=500,
+        )
+    result = sync_teams_from_world_cup(payload)
+    return JsonResponse(result, status=201)
 
 
 @staff_member_required

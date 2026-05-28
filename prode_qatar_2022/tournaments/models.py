@@ -27,6 +27,13 @@ class Tournament(models.Model):
 
 
 class Team(models.Model):
+    external_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        help_text="ID del equipo en football-data.org",
+    )
     name = models.CharField(max_length=100)
     fifa_code = models.CharField(max_length=3, unique=False)
 
@@ -56,6 +63,13 @@ class Game(models.Model):
         default=0, choices=penalties_win_options
     )
     date_time = models.DateTimeField()
+    external_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        help_text="ID del partido en football-data.org",
+    )
     played = models.BooleanField(default=False)
     game_instance = models.PositiveSmallIntegerField(
         default=0, choices=game_instance_options

@@ -1,0 +1,27 @@
+{
+    "count": 2,
+    "filters": {"season": "2026"},
+    "competition": {
+        "id": 2000,
+        "name": "FIFA World Cup",
+        "code": "WC",
+        "type": "CUP",
+        "emblem": "https://example.com/wm26.png"
+    },
+    "teams": [
+        {
+            "id": 758,
+            "name": "Uruguay",
+            "shortName": "Uruguay",
+            "tla": "URY",
+            "area": {"id": 2257, "name": "Uruguay", "code": "URY", "flag": "https://example.com/758.svg"}
+        },
+        {
+            "id": 764,
+            "name": "Argentina",
+            "shortName": "Argentina",
+            "tla": "ARG",
+            "squad": [{"id": 1, "name": "Player", "position": "Goalkeeper", "dateOfBirth": "1990-01-01", "nationality": "Argentina"}]
+        }
+    ]
+}
