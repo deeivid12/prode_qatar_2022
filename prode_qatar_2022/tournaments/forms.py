@@ -17,6 +17,13 @@ class RoomForm(forms.ModelForm):
             "name": forms.TextInput(attrs={"class": "form-control"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["private"].help_text = (
+            "Las salas privadas solo admiten participantes agregados "
+            "manualmente desde el admin de Django."
+        )
+
 
 class TournamentForm(forms.ModelForm):
     class Meta:

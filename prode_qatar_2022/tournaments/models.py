@@ -104,6 +104,9 @@ class Room(models.Model):
     def __str__(self):
         return f"{self.name} - {self.tournament}"
 
+    def participants(self):
+        return self.users.filter(is_staff=False)
+
 
 class Pronostic(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)

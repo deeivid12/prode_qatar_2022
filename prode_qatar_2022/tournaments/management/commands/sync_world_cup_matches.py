@@ -1,18 +1,19 @@
+import logging
+
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from pydantic import ValidationError
 
+from tournaments.integrations.football_data_client import FootballDataAPIError
 from tournaments.models import Tournament
-from tournaments.services.world_cup_matches import (
-    STAGE_CHOICES,
-    load_world_cup_matches_file,
-    sync_world_cup_matches,
-)
+from tournaments.services.football_data_api import fetch_wc_matches
+from tournaments.services.world_cup_matches import STAGE_CHOICES, sync_world_cup_matches
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = (
-        "Importa partidos del mundial desde el JSON (football-data.org). "
+        "Importa partidos del mundial desde football-data.org (API). "
         "Solo crea partidos con ambos equipos definidos (external_id no nulo)."
     )
 
@@ -35,19 +36,21 @@ class Command(BaseCommand):
         tournament_name = options["tournament"] or settings.WORLD_CUP_TOURNAMENT_NAME
         tournament = Tournament.objects.filter(name=tournament_name).first()
         if not tournament:
+            logger.error('sync_world_cup_matches: tournament "%s" no encontrado', tournament_name)
             self.stderr.write(
                 self.style.ERROR(f'Tournament "{tournament_name}" no encontrado en DB.')
             )
             return
 
-        json_path = settings.WORLD_CUP_MATCHES_JSON
         try:
-            payload = load_world_cup_matches_file(json_path)
-        except FileNotFoundError:
-            self.stderr.write(self.style.ERROR(f"Archivo no encontrado: {json_path}"))
+            payload = fetch_wc_matches()
+        except FootballDataAPIError as exc:
+            logger.error("sync_world_cup_matches: error de API: %s", exc)
+            self.stderr.write(self.style.ERROR(str(exc)))
             return
-        except ValidationError as exc:
-            self.stderr.write(self.style.ERROR(f"JSON inválido: {exc}"))
+        except ValueError as exc:
+            logger.error("sync_world_cup_matches: respuesta inválida: %s", exc)
+            self.stderr.write(self.style.ERROR(str(exc)))
             return
 
         try:
@@ -55,6 +58,7 @@ class Command(BaseCommand):
                 payload, tournament, stage=options["stage"]
             )
         except ValueError as exc:
+            logger.error("sync_world_cup_matches: %s", exc)
             self.stderr.write(self.style.ERROR(str(exc)))
             return
 
@@ -62,10 +66,20 @@ class Command(BaseCommand):
         updated = len(result["updated"])
         skipped_tbd = len(result["skipped_undefined_teams"])
         skipped_team = len(result["skipped_missing_team"])
+        logger.info(
+            "sync_world_cup_matches stage=%s processed=%s created=%s updated=%s "
+            "skipped_tbd=%s skipped_team=%s",
+            result["stage"],
+            result["processed"],
+            created,
+            updated,
+            skipped_tbd,
+            skipped_team,
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'[{result["stage"]}] Procesados {result["processed"]} partidos del JSON — '
+                f'[{result["stage"]}] Procesados {result["processed"]} partidos de la API — '
                 f"{created} creados, {updated} actualizados."
             )
         )

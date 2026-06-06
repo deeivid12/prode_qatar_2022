@@ -1,3 +1,4 @@
+import logging
 import os
 from tournaments.models import Game, Pronostic, Room
 from tournaments.forms import (
@@ -27,19 +28,20 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from pydantic import ValidationError
+from tournaments.integrations.football_data_client import FootballDataAPIError
+from tournaments.services.football_data_api import fetch_wc_matches, fetch_wc_teams
 from tournaments.services.world_cup_matches import (
-    load_world_cup_matches_file,
     matches_to_public_payload,
 )
 from tournaments.services.world_cup_teams import (
-    load_world_cup_teams_file,
     sync_teams_from_world_cup,
     teams_to_public_payload,
 )
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 @staff_member_required
@@ -75,15 +77,21 @@ def new_room(request):
         form = RoomForm(request.POST)
         if form.is_valid():
             room = form.save()
-            room.users.set([current_user])
-            room.save()
-            messages.success(
-                request,
-                "Se ha registrado la sala correctamente.",
-            )
+            if not room.private:
+                room.users.set([current_user])
+            if room.private:
+                messages.success(
+                    request,
+                    "Sala privada creada. Agregá participantes desde el admin de Django.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Se ha registrado la sala correctamente.",
+                )
             return redirect("all_rooms")
         else:
-            print(form.errors.as_data())
+            logger.warning("new_room: errores de validación: %s", form.errors.as_data())
     else:
         form = RoomForm()
         data = {"form": form, "title": "Room"}
@@ -203,7 +211,8 @@ def get_points(request):
     # it'll work just for now, to test everything is good
     pronostics = Pronostic.objects.filter(checked=True)
     points = [pronostic.points for pronostic in pronostics]
-    print(sum(points))
+    total = sum(points)
+    logger.debug("get_points: total de puntos revisados=%s", total)
     return redirect("all_games")
 
 
@@ -243,7 +252,7 @@ def get_ranking(request, room_id):
     ranking = []
     room = Room.objects.filter(id=room_id).first()
     tournament_id = room.tournament.id
-    users = room.users.all()
+    users = room.participants()
     users_ids = [user.id for user in users]
     pronostics_data = list(
         Pronostic.objects
@@ -324,17 +333,22 @@ def join_room(request, room_code):
     room = Room.objects.filter(room_code=room_code).first()
     if room:
         found_user = room.users.filter(id=current_user.id).first()
-        if not found_user:
+        if found_user:
+            messages.warning(
+                request,
+                "Usted ya participa de esta sala porque se ha unido previamente.",
+            )
+        elif room.private:
+            messages.warning(
+                request,
+                "Esta sala es privada. Pedile al administrador que te agregue.",
+            )
+        else:
             room.users.add(current_user)
             room.save()
             messages.success(
                 request,
                 "Se ha unido a la sala correctamente.",
-            )
-        else:
-            messages.warning(
-                request,
-                "Usted ya participa de esta sala porque se ha unido previamente.",
             )
     else:
         messages.warning(
@@ -357,7 +371,7 @@ def all_results_by_room(request, room_id):
             "Usted no pertenece a esa sala.",
         )
         redirect("welcome")
-    users = room.users.all()
+    users = room.participants()
     users_ids = [user.id for user in users]
     start_date = make_aware(dt_naive, timezone=timezone.utc)
     end_date = timezone.now() + timedelta(minutes=MINUTES-5)
@@ -380,37 +394,41 @@ def all_results_by_room(request, room_id):
 @require_GET
 def world_cup_teams(request):
     try:
-        payload = load_world_cup_teams_file(settings.WORLD_CUP_TEAMS_JSON)
-    except FileNotFoundError:
+        payload = fetch_wc_teams()
+    except FootballDataAPIError as exc:
+        logger.error("world_cup_teams: error de API: %s", exc)
         return JsonResponse(
-            {"error": "Archivo de equipos no encontrado"},
-            status=404,
+            {"error": str(exc)},
+            status=exc.status_code or 502,
         )
-    except ValidationError as exc:
-        return JsonResponse(
-            {"error": "JSON inválido", "details": exc.errors()},
-            status=500,
-        )
+    except ValueError as exc:
+        logger.error("world_cup_teams: respuesta inválida: %s", exc)
+        return JsonResponse({"error": str(exc)}, status=502)
     teams = teams_to_public_payload(payload.teams)
     return JsonResponse({"count": len(teams), "teams": teams})
 
 
 @require_GET
 def world_cup_matches(request):
+    status = request.GET.get("status")
+    if status == "":
+        status = None
     try:
-        payload = load_world_cup_matches_file(settings.WORLD_CUP_MATCHES_JSON)
-    except FileNotFoundError:
+        payload = fetch_wc_matches(status=status)
+    except FootballDataAPIError as exc:
+        logger.error("world_cup_matches: error de API status=%s: %s", status, exc)
         return JsonResponse(
-            {"error": "Archivo de partidos no encontrado"},
-            status=404,
+            {"error": str(exc)},
+            status=exc.status_code or 502,
         )
-    except ValidationError as exc:
-        return JsonResponse(
-            {"error": "JSON inválido", "details": exc.errors()},
-            status=500,
-        )
+    except ValueError as exc:
+        logger.error("world_cup_matches: parámetro o respuesta inválida: %s", exc)
+        return JsonResponse({"error": str(exc)}, status=400)
     matches = matches_to_public_payload(payload.matches)
-    return JsonResponse({"count": len(matches), "matches": matches})
+    body = {"count": len(matches), "matches": matches}
+    if status:
+        body["status"] = status
+    return JsonResponse(body)
 
 
 @csrf_exempt
@@ -418,18 +436,23 @@ def world_cup_matches(request):
 @staff_member_required
 def world_cup_teams_sync(request):
     try:
-        payload = load_world_cup_teams_file(settings.WORLD_CUP_TEAMS_JSON)
-    except FileNotFoundError:
+        payload = fetch_wc_teams()
+    except FootballDataAPIError as exc:
+        logger.error("world_cup_teams_sync: error de API: %s", exc)
         return JsonResponse(
-            {"error": "Archivo de equipos no encontrado"},
-            status=404,
+            {"error": str(exc)},
+            status=exc.status_code or 502,
         )
-    except ValidationError as exc:
-        return JsonResponse(
-            {"error": "JSON inválido", "details": exc.errors()},
-            status=500,
-        )
+    except ValueError as exc:
+        logger.error("world_cup_teams_sync: respuesta inválida: %s", exc)
+        return JsonResponse({"error": str(exc)}, status=502)
     result = sync_teams_from_world_cup(payload)
+    logger.info(
+        "world_cup_teams_sync: count=%s created=%s updated=%s",
+        result["count"],
+        len(result["created"]),
+        len(result["updated"]),
+    )
     return JsonResponse(result, status=201)
 
 
@@ -446,5 +469,7 @@ def bulk_creation(request, model):
         data = bulk_data[model]
         insert_func(data)
     except Exception as exc:
+        logger.exception("bulk_creation model=%s falló", model)
         return JsonResponse({"error": f"No se pudo ejecutar: {exc}"})
+    logger.info("bulk_creation model=%s ejecutado correctamente", model)
     return JsonResponse({"success": "Inserts masivos ejecutados correctamente."})

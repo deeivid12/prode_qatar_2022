@@ -1,3 +1,4 @@
+import logging
 import os
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic, Room, Team, Tournament
@@ -13,6 +14,8 @@ from commons.utils import (
     POINTS_INCORRECT_RESULT,
 )
 from datetime import timedelta
+
+logger = logging.getLogger(__name__)
 
 
 def get_all_pronostics_by_user(user, room):
@@ -71,12 +74,14 @@ def new_pronostic_by_form(pronostic_data):
         pronostic.last_modified = timezone.now()
         pronostic.save()
     else:
-        print(form.errors.as_data())
+        logger.warning("new_pronostic_by_form: errores de validación: %s", form.errors.as_data())
 
 
 def check_pronostics_results():
     """Check pronostics versus games results and it updates status and pronostics points"""
     pronostics = Pronostic.objects.filter(checked=False)
+    pending_count = pronostics.count()
+    checked_count = 0
     for pronostic in pronostics:
         game = Game.objects.filter(id=pronostic.game.id, played=True).first()
         if not game:
@@ -90,6 +95,15 @@ def check_pronostics_results():
         pronostic.checked = True
         pronostic.points = points
         pronostic.save()
+        checked_count += 1
+
+    remaining = Pronostic.objects.filter(checked=False).count()
+    logger.info(
+        "check_pronostics_results: pending=%s checked=%s remaining=%s",
+        pending_count,
+        checked_count,
+        remaining,
+    )
 
 
 def get_ranking_by_room(room_id):
@@ -109,7 +123,7 @@ def get_ranking_by_room(room_id):
     )
     ranking = []
     if len(pronostics_ranking) == 0:
-        users = Room.objects.filter(id=room_id).first().users.all()
+        users = Room.objects.filter(id=room_id).first().participants()
         for idx, user in enumerate(users):
             position = idx + 1
             ranking.append(
@@ -149,7 +163,7 @@ def insert_teams_batch(teams_batch):
                 new_team.save()
         return True
     except Exception as exc:
-        print(f"Error al insertar lote de teams: {exc}")
+        logger.exception("Error al insertar lote de teams")
         raise Exception(exc)
 
 
@@ -167,5 +181,5 @@ def insert_games_batch(games_batch):
                 new_game.save()
         return True
     except Exception as exc:
-        print(f"Error al insertar lote de games: {exc}")
+        logger.exception("Error al insertar lote de games")
         raise Exception(exc)

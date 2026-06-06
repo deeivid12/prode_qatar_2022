@@ -12,16 +12,34 @@
 </div>
 <div class="row">
 	<div class="col-8 col-sm-6 col-md-4 col-lg-3 col-xl-2 mx-auto form-group">
+		{% if form.non_field_errors %}
+		<div class="alert alert-danger" role="alert">
+			{% for error in form.non_field_errors %}
+			<div>{{ error }}</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+
 		<form method="post" action="{% url 'account_login' %}">
 			{% csrf_token %}
+			{% if redirect_field_value %}
+			<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+			{% endif %}
+
 			<div class="form-outline mb-2">
-			  <input type="text" name="login" id="login" class="form-control mb-2" />
-			  <label class="form-label" for="login">Usuario o Email</label>
+			  <input type="text" name="login" id="login" class="form-control mb-2{% if form.login.errors %} is-invalid{% endif %}" value="{{ form.login.value|default:'' }}" required autofocus />
+			  <label class="form-label" for="login">Usuario</label>
+			  {% for error in form.login.errors %}
+			  <div class="invalid-feedback d-block">{{ error }}</div>
+			  {% endfor %}
 			</div>
 
 			<div class="form-outline mb-2">
-			  <input type="password" name="password" id="password" class="form-control mb-2" />
+			  <input type="password" name="password" id="password" class="form-control mb-2{% if form.password.errors %} is-invalid{% endif %}" required />
 			  <label class="form-label" for="password">Password</label>
+			  {% for error in form.password.errors %}
+			  <div class="invalid-feedback d-block">{{ error }}</div>
+			  {% endfor %}
 			</div>
 
 			<div class="row mb-4">
@@ -37,7 +55,6 @@
 
 			<div class="text-center">
 			  <p>¿No esta registrado? <a href="{% url 'account_signup' %}">Registro</a></p>
-			  <p><a href="{% url 'account_reset_password' %}">¿Olvidaste tu password?</a></p>
 			</div>
 		</form>
 	</div>

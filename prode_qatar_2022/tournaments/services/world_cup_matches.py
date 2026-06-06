@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from django.db import transaction
@@ -5,6 +6,8 @@ from django.db import transaction
 from commons.tournaments import check_pronostics_results
 from tournaments.models import Game, Team, Tournament
 from tournaments.schemas.world_cup import WorldCupMatch, WorldCupMatchesFile, WorldCupScore
+
+logger = logging.getLogger(__name__)
 
 STAGE_CHOICES = (
     "ALL",
@@ -153,7 +156,7 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
 
     check_pronostics_results()
 
-    return {
+    result = {
         "updated": updated,
         "updated_count": len(updated),
         "skipped_not_finished": skipped_not_finished,
@@ -161,6 +164,33 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
         "skipped_not_in_db": skipped_not_in_db,
         "skipped_locked": skipped_locked,
     }
+
+    logger.info(
+        "update_world_cup_results: updated=%s skipped_not_finished=%s "
+        "skipped_no_score=%s skipped_not_in_db=%s skipped_locked=%s",
+        result["updated_count"],
+        skipped_not_finished,
+        len(skipped_no_score),
+        len(skipped_not_in_db),
+        len(skipped_locked),
+    )
+    if skipped_no_score:
+        logger.warning(
+            "update_world_cup_results: partidos FINISHED sin marcador: %s",
+            skipped_no_score,
+        )
+    if skipped_not_in_db:
+        logger.warning(
+            "update_world_cup_results: partidos no encontrados en DB: %s",
+            skipped_not_in_db,
+        )
+    if skipped_locked:
+        logger.warning(
+            "update_world_cup_results: partidos omitidos por bloqueo manual: %s",
+            skipped_locked,
+        )
+
+    return result
 
 
 def filter_matches_by_stage(
@@ -249,7 +279,7 @@ def sync_world_cup_matches(
             else:
                 updated.append(entry)
 
-    return {
+    result = {
         "stage": stage,
         "processed": len(matches),
         "created": created,
@@ -258,3 +288,27 @@ def sync_world_cup_matches(
         "skipped_missing_team": skipped_missing_team,
         "skipped_unknown_stage": skipped_unknown_stage,
     }
+
+    logger.info(
+        "sync_world_cup_matches stage=%s processed=%s created=%s updated=%s "
+        "skipped_undefined_teams=%s skipped_missing_team=%s skipped_unknown_stage=%s",
+        stage,
+        result["processed"],
+        len(created),
+        len(updated),
+        len(skipped_undefined_teams),
+        len(skipped_missing_team),
+        len(skipped_unknown_stage),
+    )
+    if skipped_missing_team:
+        logger.warning(
+            "sync_world_cup_matches: equipos no encontrados en DB (ejecutá sync_world_cup_teams): %s",
+            skipped_missing_team[:10],
+        )
+    if skipped_unknown_stage:
+        logger.warning(
+            "sync_world_cup_matches: stages desconocidos: %s",
+            skipped_unknown_stage,
+        )
+
+    return result

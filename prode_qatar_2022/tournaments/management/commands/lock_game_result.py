@@ -1,6 +1,10 @@
+import logging
+
 from django.core.management.base import BaseCommand
 
 from tournaments.models import Game
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -25,6 +29,7 @@ class Command(BaseCommand):
         reason = options["reason"].strip()
         game = Game.objects.filter(external_id=external_id).first()
         if not game:
+            logger.error("lock_game_result: Game external_id=%s no encontrado", external_id)
             self.stderr.write(
                 self.style.ERROR(
                     f"No se encontró Game con external_id={external_id} en DB."
@@ -35,6 +40,11 @@ class Command(BaseCommand):
         game.result_locked = True
         game.result_locked_reason = reason
         game.save(update_fields=["result_locked", "result_locked_reason"])
+        logger.info(
+            "lock_game_result: external_id=%s reason=%r",
+            external_id,
+            reason or "(sin motivo)",
+        )
         self.stdout.write(
             self.style.SUCCESS(
                 f"Partido {external_id} bloqueado. "

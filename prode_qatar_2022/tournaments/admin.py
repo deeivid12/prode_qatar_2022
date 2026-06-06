@@ -44,8 +44,20 @@ class GameAdmin(admin.ModelAdmin):
     def get_game_display(self, obj):
         return str(obj)
 
+
+class RoomAdmin(admin.ModelAdmin):
+    filter_horizontal = ("users",)
+    list_display = ("name", "tournament", "private", "room_code", "participant_count")
+    list_filter = ("private", "tournament")
+    search_fields = ("name", "room_code")
+
+    @admin.display(description="Participantes")
+    def participant_count(self, obj):
+        return obj.participants().count()
+
+
 admin.site.register(models.Team)
 admin.site.register(models.Game, GameAdmin)
 admin.site.register(models.Tournament)
 admin.site.register(models.Pronostic)
-admin.site.register(models.Room)
+admin.site.register(models.Room, RoomAdmin)

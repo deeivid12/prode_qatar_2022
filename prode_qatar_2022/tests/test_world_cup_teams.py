@@ -1,10 +1,12 @@
 from pathlib import Path
+from unittest.mock import patch
 
+import json
 import pytest
 from django.contrib.auth.models import User
-from django.test import override_settings
 
 from tournaments.models import Team
+from tournaments.schemas.world_cup import WorldCupTeamsFile
 from tournaments.services.world_cup_teams import (
     load_world_cup_teams_file,
     sync_teams_from_world_cup,
@@ -51,7 +53,13 @@ def test_sync_teams_from_world_cup_is_idempotent():
 
 @pytest.mark.django_db
 def test_world_cup_teams_endpoint(client):
-    with override_settings(WORLD_CUP_TEAMS_JSON=str(FIXTURE)):
+    raw = json.loads(
+        (Path(__file__).parent / "fixtures" / "equipos_mundial_sample.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    payload = WorldCupTeamsFile.model_validate(raw)
+    with patch("tournaments.views.fetch_wc_teams", return_value=payload):
         response = client.get("/api/world-cup/teams")
     assert response.status_code == 200
     body = response.json()
@@ -61,8 +69,7 @@ def test_world_cup_teams_endpoint(client):
 
 @pytest.mark.django_db
 def test_world_cup_teams_sync_endpoint_requires_staff(client):
-    with override_settings(WORLD_CUP_TEAMS_JSON=str(FIXTURE)):
-        response = client.post("/api/world-cup/teams/sync")
+    response = client.post("/api/world-cup/teams/sync")
     assert response.status_code == 302
 
 
@@ -74,7 +81,13 @@ def test_world_cup_teams_sync_endpoint_creates_teams(client):
         is_staff=True,
     )
     client.force_login(staff)
-    with override_settings(WORLD_CUP_TEAMS_JSON=str(FIXTURE)):
+    raw = json.loads(
+        (Path(__file__).parent / "fixtures" / "equipos_mundial_sample.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    payload = WorldCupTeamsFile.model_validate(raw)
+    with patch("tournaments.views.fetch_wc_teams", return_value=payload):
         response = client.post("/api/world-cup/teams/sync")
 
     assert response.status_code == 201

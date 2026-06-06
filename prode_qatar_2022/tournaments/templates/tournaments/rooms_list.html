@@ -18,7 +18,15 @@
 					<div class="card-body">
 					<h5 class="card-title">{{room.tournament}}</h5>
 					<p class="card-text">Premio: {{room.grand_prize}}</p>
-					<p class="card-text">Código: {{room.room_code}}</p>
+					<p class="card-text">
+						{% if room.private %}
+						<span class="badge bg-secondary">Privada</span>
+						<small class="text-muted d-block mt-1">Solo participantes invitados por el administrador.</small>
+						{% else %}
+						<span class="badge bg-success">Publica</span>
+						<p class="card-text mt-2 mb-0">Codigo: {{room.room_code}}</p>
+						{% endif %}
+					</p>
 					<a href="{% url 'get_room' room.id %}" class="btn btn-dark">Ingresar</a>
 					</div>
 				</div>

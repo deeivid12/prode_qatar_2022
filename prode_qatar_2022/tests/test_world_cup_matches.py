@@ -1,10 +1,13 @@
+import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth.models import User
 from django.test import override_settings
 
 from tournaments.models import Game, Pronostic, Team, Tournament
+from tournaments.schemas.world_cup import WorldCupMatchesFile, WorldCupScore, WorldCupScoreLine
 from tournaments.services.world_cup_matches import (
     load_world_cup_matches_file,
     resolve_match_goals,
@@ -12,7 +15,6 @@ from tournaments.services.world_cup_matches import (
     sync_world_cup_matches,
     update_world_cup_results,
 )
-from tournaments.schemas.world_cup import WorldCupScore, WorldCupScoreLine
 
 FIXTURE = Path(__file__).parent / "fixtures" / "partidos_mundial_sample.json"
 FINISHED_FIXTURE = (
@@ -40,9 +42,12 @@ def test_load_world_cup_matches_file_parses_only_required_fields():
 
 @pytest.mark.django_db
 def test_world_cup_matches_endpoint(client):
-    with override_settings(WORLD_CUP_MATCHES_JSON=str(FIXTURE)):
+    raw = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    payload = WorldCupMatchesFile.model_validate(raw)
+    with patch("tournaments.views.fetch_wc_matches", return_value=payload) as mock_fetch:
         response = client.get("/api/world-cup/matches")
     assert response.status_code == 200
+    mock_fetch.assert_called_once_with(status=None)
     body = response.json()
     assert body["count"] == 2
     assert body["matches"][0]["homeTeam"]["name"] == "Mexico"
@@ -303,3 +308,62 @@ def test_update_world_cup_results_skips_non_finished(
     assert result["updated_count"] == 0
     game = Game.objects.get(external_id=999002)
     assert game.played is False
+
+
+@pytest.mark.django_db
+def test_update_world_cup_results_command_from_json(
+    world_cup_tournament, world_cup_teams_for_matches
+):
+    from django.core.management import call_command
+    from io import StringIO
+
+    game = Game.objects.create(
+        external_id=999003,
+        home_team_id=Team.objects.get(external_id=769).id,
+        away_team_id=Team.objects.get(external_id=774).id,
+        tournament=world_cup_tournament,
+        date_time="2026-07-03T19:00:00Z",
+        played=False,
+    )
+    out = StringIO()
+
+    call_command(
+        "update_world_cup_results",
+        f"--from-json={FINISHED_FIXTURE}",
+        stdout=out,
+    )
+
+    game.refresh_from_db()
+    assert game.home_goals == 3
+    assert game.away_goals == 2
+    assert game.played is True
+    assert "Actualizados" in out.getvalue()
+    assert "JSON" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_update_world_cup_results_command_uses_api_by_default(
+    world_cup_tournament, world_cup_teams_for_matches
+):
+    from django.core.management import call_command
+    from io import StringIO
+
+    Game.objects.create(
+        external_id=999003,
+        home_team_id=Team.objects.get(external_id=769).id,
+        away_team_id=Team.objects.get(external_id=774).id,
+        tournament=world_cup_tournament,
+        date_time="2026-07-03T19:00:00Z",
+        played=False,
+    )
+    payload = load_world_cup_matches_file(FINISHED_FIXTURE)
+    out = StringIO()
+
+    with patch(
+        "tournaments.management.commands.update_world_cup_results.load_wc_matches_payload",
+        return_value=payload,
+    ) as mock_load:
+        call_command("update_world_cup_results", stdout=out)
+
+    mock_load.assert_called_once_with(status="FINISHED")
+    assert "API (FINISHED)" in out.getvalue()

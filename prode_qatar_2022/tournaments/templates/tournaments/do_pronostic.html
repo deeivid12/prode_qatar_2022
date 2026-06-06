@@ -5,6 +5,10 @@
 <title>{{title}}</title>
 {% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tournaments/css/pronostics.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="row">
   <div class="col mt-2">
@@ -14,10 +18,10 @@
   </div>
 </div>
 <div class="row">
-  <div class="col col-md-8 col-lg-6 offset-md-2 offset-lg-3">
-    <form method="post">
+  <div class="col col-md-8 col-lg-6 offset-md-2 offset-lg-3 pronostic-page-content">
+    <form id="pronostic-form" method="post">
+      {% csrf_token %}
       {% for pronostic in pronostics %}
-        {% csrf_token %}
         <div class="card text-center m-4 border border-dark" data-game-id="{{pronostic.game.id}}" data-played="{{pronostic.game.played}}">
           <div class="card-header text-white bg-dark">
             {{pronostic.game.date_time|date:"d/m/y - H:i" }}hs. | {% if pronostic.game.played %} Partido Finalizado {% else %} Partido por disputarse {% endif %}
@@ -69,14 +73,16 @@
           </div>
         </div>
       {% endfor %}
+    </form>
   </div>
 </div>
-<div class="row mb-3">
-  <a onclick="history.back()" class="btn btn-dark col-3 col-md-2 col-lg-1 offset-3 offset-md-4 offset-lg-5 me-1">Volver</a>
-  <button type="submit" class="btn btn-dark col-3 col-md-2 col-lg-1">Guardar</button>
+
+<div class="pronostic-save-bar">
+  <div class="pronostic-save-bar-inner">
+    <a onclick="history.back()" class="btn btn-dark">Volver</a>
+    <button type="submit" form="pronostic-form" class="btn btn-dark">Guardar</button>
+  </div>
 </div>
-</br>
-</form>
 
 <script src="{% static 'tournaments/js/pronostics.js' %}"></script>
 {% endblock %}

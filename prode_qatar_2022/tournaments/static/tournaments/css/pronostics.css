@@ -1,0 +1,28 @@
+.pronostic-page-content {
+  padding-bottom: 5rem;
+}
+
+.pronostic-save-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: rgba(33, 37, 41, 0.95);
+  border-top: 1px solid #000;
+  padding: 0.75rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.pronostic-save-bar-inner {
+  max-width: 540px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.pronostic-save-bar .btn {
+  flex: 1;
+  max-width: 10rem;
+}

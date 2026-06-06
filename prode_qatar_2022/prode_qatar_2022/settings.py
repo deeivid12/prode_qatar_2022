@@ -188,12 +188,31 @@ CSP_IMG_SRC = ("'self'", "data:")
 # django-allauth
 SITE_ID = 1
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+ACCOUNT_LOGIN_METHODS = {"username"}
+ACCOUNT_SIGNUP_FIELDS = ["username*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_PRESERVE_USERNAME_CASING = False
+ACCOUNT_FORMS = {
+    "signup": "members.forms.CustomSignupForm",
+}
+
+RESERVED_USERNAMES = {
+    name.strip().lower()
+    for name in env.list("RESERVED_USERNAMES", default=["admin"])
+    if name.strip()
+}
+
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+# ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+# ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
 
@@ -214,3 +233,47 @@ WORLD_CUP_MATCHES_JSON = env(
     default=str(BASE_DIR / "data" / "partidos_mundial.json"),
 )
 WORLD_CUP_TOURNAMENT_NAME = env("WORLD_CUP_TOURNAMENT_NAME", default="Mundial 2026")
+
+# football-data.org
+FOOTBALL_DATA_API_BASE_URL = env(
+    "FOOTBALL_DATA_API_BASE_URL",
+    default="https://api.football-data.org",
+)
+FOOTBALL_DATA_API_TOKEN = env("FOOTBALL_DATA_API_TOKEN", default="")
+FOOTBALL_DATA_TIMEOUT_SECONDS = env.int("FOOTBALL_DATA_TIMEOUT_SECONDS", default=20)
+
+LOG_LEVEL = env("LOG_LEVEL", default="DEBUG" if DEBUG else "INFO")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "tournaments": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "commons": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}

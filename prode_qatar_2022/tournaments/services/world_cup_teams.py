@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 
 from django.db import transaction
 
 from tournaments.models import Team
 from tournaments.schemas.world_cup import WorldCupTeam, WorldCupTeamsFile
+
+logger = logging.getLogger(__name__)
 
 
 def load_world_cup_teams_file(path: Path | str) -> WorldCupTeamsFile:
@@ -47,8 +50,15 @@ def sync_teams_from_world_cup(payload: WorldCupTeamsFile) -> dict:
                 created.append(entry)
             else:
                 updated.append(entry)
-    return {
+    result = {
         "count": len(payload.teams),
         "created": created,
         "updated": updated,
     }
+    logger.info(
+        "sync_teams_from_world_cup: count=%s created=%s updated=%s",
+        result["count"],
+        len(created),
+        len(updated),
+    )
+    return result
