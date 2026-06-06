@@ -1,10 +1,12 @@
 import logging
 
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from tournaments.integrations.football_data_client import FootballDataAPIError
+from tournaments.models import Tournament
 from tournaments.services.football_data_api import load_wc_matches_payload
+from tournaments.services.match_window import get_active_games, has_active_matches
 from tournaments.services.world_cup_matches import update_world_cup_results
 
 logger = logging.getLogger(__name__)
@@ -28,8 +30,43 @@ class Command(BaseCommand):
                 "Si no se indica PATH, usa WORLD_CUP_MATCHES_JSON."
             ),
         )
+        parser.add_argument(
+            "--only-if-active",
+            action="store_true",
+            help=(
+                "Solo ejecuta si hay partidos en ventana activa "
+                "(MINUTES_BEFORE_GAME / MATCH_WINDOW_AFTER_KICKOFF)."
+            ),
+        )
+        parser.add_argument(
+            "--tournament",
+            type=str,
+            default=None,
+            help="Nombre del Tournament en DB (default: WORLD_CUP_TOURNAMENT_NAME)",
+        )
 
     def handle(self, *args, **options):
+        if options["only_if_active"]:
+            try:
+                tournament_id = self._resolve_tournament_id(options["tournament"])
+            except CommandError as exc:
+                logger.error("update_world_cup_results: %s", exc)
+                self.stderr.write(self.style.ERROR(str(exc)))
+                return
+            if not has_active_matches(tournament_id):
+                logger.info(
+                    "update_world_cup_results: sin partidos activos, ejecución omitida"
+                )
+                self.stdout.write("Sin partidos activos, ejecución omitida.")
+                return
+
+            active_games = get_active_games(tournament_id)
+            logger.info(
+                "update_world_cup_results: partidos activos=%s ids=%s",
+                active_games.count(),
+                list(active_games.values_list("id", flat=True)),
+            )
+
         json_option = options["from_json"]
         if json_option is not None:
             json_path = json_option or settings.WORLD_CUP_MATCHES_JSON
@@ -93,3 +130,15 @@ class Command(BaseCommand):
                     f"{len(result['skipped_locked'])} partido(s)"
                 )
             )
+
+    def _resolve_tournament_id(self, tournament_name):
+        if tournament_name:
+            tournament = Tournament.objects.filter(name=tournament_name).first()
+            if not tournament:
+                raise CommandError(f'Tournament "{tournament_name}" no encontrado.')
+            return tournament.id
+
+        tournament = Tournament.objects.filter(
+            name=settings.WORLD_CUP_TOURNAMENT_NAME
+        ).first()
+        return tournament.id if tournament else None

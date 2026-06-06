@@ -378,3 +378,79 @@ def test_update_world_cup_results_command_uses_api_by_default(
 
     mock_load.assert_called_once_with(status="FINISHED")
     assert "API (FINISHED)" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_update_world_cup_results_only_if_active_skips_without_matches(
+    world_cup_tournament, world_cup_teams_for_matches
+):
+    from datetime import datetime
+    from django.core.management import call_command
+    from django.utils.timezone import make_aware
+    from io import StringIO
+
+    Game.objects.create(
+        external_id=999003,
+        home_team_id=Team.objects.get(external_id=769).id,
+        away_team_id=Team.objects.get(external_id=774).id,
+        tournament=world_cup_tournament,
+        date_time=make_aware(datetime(2026, 7, 3, 19, 0, 0)),
+        played=False,
+    )
+    out = StringIO()
+    now = make_aware(datetime(2026, 6, 5, 12, 0, 0))
+
+    with patch(
+        "tournaments.management.commands.update_world_cup_results.load_wc_matches_payload",
+    ) as mock_load, patch(
+        "tournaments.services.match_window.timezone.now",
+        return_value=now,
+    ):
+        call_command(
+            "update_world_cup_results",
+            "--only-if-active",
+            f"--tournament={world_cup_tournament.name}",
+            stdout=out,
+        )
+
+    mock_load.assert_not_called()
+    assert "Sin partidos activos" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_update_world_cup_results_only_if_active_runs_with_active_match(
+    world_cup_tournament, world_cup_teams_for_matches
+):
+    from datetime import datetime
+    from django.core.management import call_command
+    from django.utils.timezone import make_aware
+    from io import StringIO
+
+    Game.objects.create(
+        external_id=999003,
+        home_team_id=Team.objects.get(external_id=769).id,
+        away_team_id=Team.objects.get(external_id=774).id,
+        tournament=world_cup_tournament,
+        date_time=make_aware(datetime(2026, 6, 11, 19, 0, 0)),
+        played=False,
+    )
+    payload = load_world_cup_matches_file(FINISHED_FIXTURE)
+    out = StringIO()
+    now = make_aware(datetime(2026, 6, 11, 18, 45, 0))
+
+    with patch(
+        "tournaments.management.commands.update_world_cup_results.load_wc_matches_payload",
+        return_value=payload,
+    ) as mock_load, patch(
+        "tournaments.services.match_window.timezone.now",
+        return_value=now,
+    ):
+        call_command(
+            "update_world_cup_results",
+            "--only-if-active",
+            f"--tournament={world_cup_tournament.name}",
+            stdout=out,
+        )
+
+    mock_load.assert_called_once_with(status="FINISHED")
+    assert "Actualizados" in out.getvalue()
