@@ -48,6 +48,8 @@ class Game(models.Model):
         (2, "Quarter-Finals"),
         (3, "Semi-Finals"),
         (4, "Finals"),
+        (5, "Round of 32"),
+        (6, "Third-place"),
     ]
     home_team = models.ForeignKey(
         Team, null=False, related_name="home_team", on_delete=models.CASCADE

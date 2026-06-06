@@ -27,7 +27,7 @@
             {{pronostic.game.date_time|date:"d/m/y - H:i" }}hs. | {% if pronostic.game.played %} Partido Finalizado {% else %} Partido por disputarse {% endif %}
           </div>
           <div class="card-body">
-            <h6 class="card-title">{% if pronostic.game.game_instance == 0 %}Fase de Grupos{% elif pronostic.game.game_instance == 1 %}Octavos de Final{% elif pronostic.game.game_instance == 2 %}Cuartos de Final{% elif pronostic.game.game_instance == 3 %}Semifinal{% elif pronostic.game.game_instance == 4 %}Final{% endif %}</h6>
+            <h6 class="card-title">{% include "tournaments/includes/game_phase_label_long.html" with game_instance=pronostic.game.game_instance %}</h6>
             
             <div class="row align-items-center">
                 <div class="col-5 fw-bold">{{pronostic.game.home_team.name}}</div>

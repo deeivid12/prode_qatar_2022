@@ -25,7 +25,7 @@
 								{% endif %}
 							</div>
 							<div class="mt-2 mt-sm-0">
-								<span class="badge bg-primary">{% if game.game_instance == 0 %}Fase de Grupos{% elif game.game_instance == 1 %}Octavos{% elif game.game_instance == 2 %}Cuartos{% elif game.game_instance == 3 %}Semifinal{% elif game.game_instance == 4 %}Final{% endif %}</span>
+								<span class="badge bg-primary">{% include "tournaments/includes/game_phase_label.html" with game_instance=game.game_instance %}</span>
 								<span class="badge {% if game.played %}bg-success{% else %}bg-warning text-dark{% endif %} ms-1">{% if game.played %}Finalizado{% else %}Pendiente{% endif %}</span>
 							</div>
 						</div>

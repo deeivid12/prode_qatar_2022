@@ -22,11 +22,11 @@ STAGE_CHOICES = (
 
 STAGE_TO_GAME_INSTANCE = {
     "GROUP_STAGE": (0, False),
-    "LAST_32": (1, True),
+    "LAST_32": (5, True),
     "LAST_16": (1, True),
     "QUARTER_FINALS": (2, True),
     "SEMI_FINALS": (3, True),
-    "THIRD_PLACE": (4, True),
+    "THIRD_PLACE": (6, True),
     "FINAL": (4, True),
 }
 

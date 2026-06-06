@@ -9,6 +9,7 @@ from django.test import override_settings
 from tournaments.models import Game, Pronostic, Team, Tournament
 from tournaments.schemas.world_cup import WorldCupMatchesFile, WorldCupScore, WorldCupScoreLine
 from tournaments.services.world_cup_matches import (
+    STAGE_TO_GAME_INSTANCE,
     load_world_cup_matches_file,
     resolve_match_goals,
     resolve_penalties_win,
@@ -20,6 +21,16 @@ FIXTURE = Path(__file__).parent / "fixtures" / "partidos_mundial_sample.json"
 FINISHED_FIXTURE = (
     Path(__file__).parent / "fixtures" / "partidos_mundial_finished_penalties.json"
 )
+
+
+def test_stage_to_game_instance_mapping():
+    assert STAGE_TO_GAME_INSTANCE["GROUP_STAGE"] == (0, False)
+    assert STAGE_TO_GAME_INSTANCE["LAST_32"] == (5, True)
+    assert STAGE_TO_GAME_INSTANCE["LAST_16"] == (1, True)
+    assert STAGE_TO_GAME_INSTANCE["QUARTER_FINALS"] == (2, True)
+    assert STAGE_TO_GAME_INSTANCE["SEMI_FINALS"] == (3, True)
+    assert STAGE_TO_GAME_INSTANCE["THIRD_PLACE"] == (6, True)
+    assert STAGE_TO_GAME_INSTANCE["FINAL"] == (4, True)
 
 
 def test_load_world_cup_matches_file_parses_only_required_fields():

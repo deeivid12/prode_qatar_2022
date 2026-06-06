@@ -27,7 +27,7 @@
 			<div class="card-body p-2">
 				<div class="d-flex justify-content-between">
 					<small>{{game.date_time|date:"d/m/y H:i"}}</small>
-					<small>{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</small>
+					<small>{% include "tournaments/includes/game_phase_label.html" with game_instance=game.game_instance %}</small>
 				</div>
 				<div class="text-center pt-1">
 					{% if game.penalties_win > 0 %}
@@ -62,7 +62,7 @@
 							<td class="align-middle fw-bold{% if game.played %} text-white-50{% endif %}">{{game.home_team}} vs {{game.away_team}}</td>
 							<td class="align-middle text-center fw-bold{% if game.played %} text-white-50{% endif %}">{% if game.played %}{{game.home_goals}}-{{game.away_goals}}{% else %}-{% endif %}</td>
 							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{% if game.penalties_win == 1 %}{{game.home_team}}{% elif game.penalties_win == 2 %}{{game.away_team}}{% else %}-{% endif %}</td>
-							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{% if game.game_instance == 0 %}Grupos{% elif game.game_instance == 1 %}8vos{% elif game.game_instance == 2 %}4tos{% elif game.game_instance == 3 %}Semis{% elif game.game_instance == 4 %}Final{% endif %}</td>
+							<td class="align-middle{% if game.played %} text-white-50{% endif %}">{% include "tournaments/includes/game_phase_label.html" with game_instance=game.game_instance %}</td>
 						</tr>
 					{% endfor %}
 					</tbody>
