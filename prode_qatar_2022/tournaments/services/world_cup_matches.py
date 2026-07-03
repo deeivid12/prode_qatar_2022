@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.db import transaction
 
-from commons.tournaments import check_pronostics_results
+from commons.tournaments import run_check_pronostics_results
 from tournaments.models import Game, Team, Tournament
 from tournaments.schemas.world_cup import WorldCupMatch, WorldCupMatchesFile, WorldCupScore
 
@@ -154,7 +154,7 @@ def update_world_cup_results(payload: WorldCupMatchesFile) -> dict:
                     }
                 )
 
-    check_pronostics_results()
+    run_check_pronostics_results()
 
     result = {
         "updated": updated,

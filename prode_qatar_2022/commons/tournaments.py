@@ -106,6 +106,48 @@ def check_pronostics_results():
     )
 
 
+def check_pronostics_results_v2():
+    """Check pronostics versus games results (optimized: filter + select_related + bulk_update)."""
+    pending_count = Pronostic.objects.filter(checked=False).count()
+
+    pronostics = Pronostic.objects.filter(
+        checked=False, game__played=True
+    ).select_related("game")
+
+    to_update = []
+    for pronostic in pronostics:
+        game = pronostic.game
+        if is_correct_same_result(pronostic, game):
+            points = POINTS_CORRECT_SAME_RESULT
+        elif is_correct_different_result(pronostic, game):
+            points = POINTS_CORRECT_DIFF_RESULT
+        else:
+            points = POINTS_INCORRECT_RESULT
+        pronostic.checked = True
+        pronostic.points = points
+        to_update.append(pronostic)
+
+    if to_update:
+        Pronostic.objects.bulk_update(to_update, ["checked", "points"])
+
+    checked_count = len(to_update)
+    remaining = Pronostic.objects.filter(checked=False).count()
+    logger.info(
+        "check_pronostics_results_v2: pending=%s checked=%s remaining=%s",
+        pending_count,
+        checked_count,
+        remaining,
+    )
+
+
+def run_check_pronostics_results():
+    from django.conf import settings
+
+    if settings.PRONOSTICS_CHECK_VERSION == 2:
+        return check_pronostics_results_v2()
+    return check_pronostics_results()
+
+
 def get_ranking_by_room(room_id):
     """Gets ranking of users, for a room id given, in ascending order
 

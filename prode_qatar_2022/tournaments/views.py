@@ -11,7 +11,7 @@ from commons.tournaments import (
     get_all_pronostics_by_user,
     update_pronostic,
     new_pronostic_by_form,
-    check_pronostics_results,
+    run_check_pronostics_results,
     get_ranking_by_room,
     is_pronostic_in_time,
     insert_games_batch,
@@ -203,7 +203,7 @@ def do_pronostic(request, room_id):
 
 @staff_member_required
 def check_pronostics(request):
-    check_pronostics_results()
+    run_check_pronostics_results()
     return redirect("all_games")
 
 
