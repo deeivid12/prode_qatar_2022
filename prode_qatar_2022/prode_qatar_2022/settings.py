@@ -240,6 +240,9 @@ PRONOSTICS_CHECK_VERSION = env.int("PRONOSTICS_CHECK_VERSION", default=2)
 # 1 = get_ranking v1, 2 = build_room_ranking_v2 (optimizada)
 RANKING_VERSION = env.int("RANKING_VERSION", default=2)
 
+# 1 = all_results_by_room v1, 2 = build_room_predictions_v2 (optimizada)
+ALL_RESULTS_VERSION = env.int("ALL_RESULTS_VERSION", default=2)
+
 # football-data.org
 FOOTBALL_DATA_API_BASE_URL = env(
     "FOOTBALL_DATA_API_BASE_URL",

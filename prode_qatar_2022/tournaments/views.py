@@ -13,6 +13,8 @@ from commons.tournaments import (
     new_pronostic_by_form,
     run_check_pronostics_results,
     build_room_ranking_v2,
+    build_room_predictions_v2,
+    get_prediction_window_bounds,
     get_ranking_by_room,
     is_pronostic_in_time,
     insert_games_batch,
@@ -381,23 +383,18 @@ def join_room(request, room_code):
     return redirect("welcome")
 
 
-def all_results_by_room(request, room_id):
-    MINUTES = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
-    START_DATE = str(os.environ.get("START_DATE_TO_SHOW_PREDICTIONS", "2025-01-01"))
-    dt_naive = datetime.strptime(START_DATE, "%Y-%m-%d")
+def all_results_by_room_v1(request, room_id):
+    start_date, end_date = get_prediction_window_bounds()
 
-    current_user = request.user
-    room = current_user.tournaments_rooms.filter(id=room_id).first()
+    room = request.user.tournaments_rooms.filter(id=room_id).first()
     if not room:
         messages.error(
             request,
             "Usted no pertenece a esa sala.",
         )
-        redirect("welcome")
+        return redirect("welcome")
     users = room.participants()
     users_ids = [user.id for user in users]
-    start_date = make_aware(dt_naive, timezone=timezone.utc)
-    end_date = timezone.now() + timedelta(minutes=MINUTES-5)
     games_to_show = (
         Game.objects.filter(
             date_time__range=(start_date, end_date),
@@ -405,13 +402,39 @@ def all_results_by_room(request, room_id):
         )
         .order_by("date_time")
         .all()
-    )  # poner tournament
+    )
     all_pronostics = []
     for game in games_to_show:
-        pronostics_by_game = Pronostic.objects.filter(game=game.id, user_id__in=users_ids).all()
+        pronostics_by_game = Pronostic.objects.filter(
+            game=game.id, user_id__in=users_ids
+        ).all()
         all_pronostics.append(pronostics_by_game)
     data = {"games_pronostics": zip(games_to_show, all_pronostics)}
     return render(request, "tournaments/all_results.html", data)
+
+
+def all_results_by_room_v2(request, room_id):
+    room = request.user.tournaments_rooms.filter(id=room_id).first()
+    if not room:
+        messages.error(
+            request,
+            "Usted no pertenece a esa sala.",
+        )
+        return redirect("welcome")
+
+    start_date, end_date = get_prediction_window_bounds()
+    games_pronostics = build_room_predictions_v2(room, start_date, end_date)
+    return render(
+        request,
+        "tournaments/all_results.html",
+        {"games_pronostics": games_pronostics},
+    )
+
+
+def all_results_by_room(request, room_id):
+    if settings.ALL_RESULTS_VERSION == 2:
+        return all_results_by_room_v2(request, room_id)
+    return all_results_by_room_v1(request, room_id)
 
 
 @require_GET

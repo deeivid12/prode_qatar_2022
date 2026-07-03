@@ -2,11 +2,14 @@ import logging
 import os
 from tournaments.forms import PronosticForm
 from tournaments.models import Game, Pronostic, Room, Team, Tournament
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count, F, Q, Sum
 from django.db.models.functions import Coalesce
+from django.utils.timezone import make_aware
+from django.utils import timezone
 from commons.utils import (
     is_correct_same_result,
     is_correct_different_result,
@@ -14,7 +17,6 @@ from commons.utils import (
     POINTS_CORRECT_DIFF_RESULT,
     POINTS_INCORRECT_RESULT,
 )
-from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +249,46 @@ def get_ranking_by_room(room_id):
 def is_pronostic_in_time(game_datetime):
     MINUTES = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
     return timezone.now().timestamp() < (game_datetime - timedelta(minutes=MINUTES)).timestamp()
+
+
+def get_prediction_window_bounds():
+    """Rango de fechas para mostrar predicciones de participantes."""
+    minutes = int(os.environ.get("MINUTES_BEFORE_GAME", 60))
+    start_date_str = os.environ.get("START_DATE_TO_SHOW_PREDICTIONS", "2025-01-01")
+    dt_naive = datetime.strptime(start_date_str, "%Y-%m-%d")
+    start_date = make_aware(dt_naive, timezone=timezone.utc)
+    end_date = timezone.now() + timedelta(minutes=minutes - 5)
+    return start_date, end_date
+
+
+def build_room_predictions_v2(room, start_date, end_date):
+    """Predicciones de participantes por partido (optimizado: 2 queries + agrupación)."""
+    participants = room.participants()
+
+    games = list(
+        Game.objects.filter(
+            date_time__range=(start_date, end_date),
+            tournament_id=room.tournament_id,
+        )
+        .select_related("home_team", "away_team")
+        .order_by("date_time")
+    )
+    if not games:
+        return []
+
+    pronostics_by_game = {game.id: [] for game in games}
+    pronostics = (
+        Pronostic.objects.filter(
+            game_id__in=pronostics_by_game,
+            user__in=participants,
+        )
+        .select_related("user")
+        .order_by("user__username")
+    )
+    for pronostic in pronostics:
+        pronostics_by_game[pronostic.game_id].append(pronostic)
+
+    return [(game, pronostics_by_game[game.id]) for game in games]
 
 
 def insert_teams_batch(teams_batch):
