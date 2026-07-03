@@ -5,7 +5,8 @@ from tournaments.models import Game, Pronostic, Room, Team, Tournament
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Count, F, Q, Sum
+from django.db.models.functions import Coalesce
 from commons.utils import (
     is_correct_same_result,
     is_correct_different_result,
@@ -146,6 +147,60 @@ def run_check_pronostics_results():
     if settings.PRONOSTICS_CHECK_VERSION == 2:
         return check_pronostics_results_v2()
     return check_pronostics_results()
+
+
+RANKING_PUBLIC_FIELDS = ("username", "total", "exact_result", "partial_result")
+
+
+def _ranking_row_from_score(score_row):
+    return {field: score_row[field] for field in RANKING_PUBLIC_FIELDS}
+
+
+def build_room_ranking_v2(room):
+    participants = room.participants()
+    tournament_id = room.tournament_id
+
+    scores = (
+        Pronostic.objects.filter(
+            checked=True,
+            game__tournament_id=tournament_id,
+            user__in=participants,
+        )
+        .values("user_id", username=F("user__username"))
+        .annotate(
+            total=Coalesce(Sum("points"), 0),
+            exact_result=Count("id", filter=Q(points=5)),
+            partial_result=Count("id", filter=Q(points=3)),
+        )
+        .order_by("-total", "-exact_result", "-partial_result", "username")
+    )
+
+    by_user_id = {row["user_id"]: row for row in scores}
+
+    merged = []
+    for user in participants:
+        score_row = by_user_id.get(user.id)
+        if score_row is not None:
+            merged.append(_ranking_row_from_score(score_row))
+        else:
+            merged.append(
+                {
+                    "username": user.username,
+                    "total": 0,
+                    "exact_result": 0,
+                    "partial_result": 0,
+                }
+            )
+
+    merged.sort(
+        key=lambda r: (
+            -r["total"],
+            -r["exact_result"],
+            -r["partial_result"],
+            r["username"],
+        )
+    )
+    return [{"position": idx + 1, **row} for idx, row in enumerate(merged)]
 
 
 def get_ranking_by_room(room_id):

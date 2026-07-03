@@ -12,6 +12,7 @@ from commons.tournaments import (
     update_pronostic,
     new_pronostic_by_form,
     run_check_pronostics_results,
+    build_room_ranking_v2,
     get_ranking_by_room,
     is_pronostic_in_time,
     insert_games_batch,
@@ -239,8 +240,21 @@ def get_ranking_2(request, room_id):
     return render(request, "tournaments/pronostics_ranking.html", data)
 
 
+def _ranking_response(request, room, ranking):
+    return render(
+        request,
+        "tournaments/pronostics_ranking.html",
+        {
+            "pronostics_ranking": ranking,
+            "room_name": room.name,
+            "tournament": room.tournament.name,
+            "grand_prize": room.grand_prize,
+        },
+    )
+
+
 @login_required(login_url="account_login")
-def get_ranking(request, room_id):
+def get_ranking_v1(request, room_id):
     current_user = request.user
     user_rooms_ids = (
         User.objects.filter(id=current_user.id)
@@ -249,28 +263,23 @@ def get_ranking(request, room_id):
     )
     if room_id not in user_rooms_ids:
         return JsonResponse({"error_404": "No corresponde el room con el usuario"})
-    ranking = []
     room = Room.objects.filter(id=room_id).first()
     tournament_id = room.tournament.id
     users = room.participants()
     users_ids = [user.id for user in users]
     pronostics_data = list(
-        Pronostic.objects
-        .filter(game__tournament_id=tournament_id, user_id__in=users_ids)
-        .values(username=F('user__username'))
-        .annotate(
-            total=Sum('points', default=0),
-            exact_result=Count(
-            Case(
-                When(points=5, then=1),
-                output_field=IntegerField()
-            )),
-            partial_result=Count(
-            Case(
-                When(points=3, then=1),
-                output_field=IntegerField()
-            )
+        Pronostic.objects.filter(
+            game__tournament_id=tournament_id, user_id__in=users_ids
         )
+        .values(username=F("user__username"))
+        .annotate(
+            total=Sum("points", default=0),
+            exact_result=Count(
+                Case(When(points=5, then=1), output_field=IntegerField())
+            ),
+            partial_result=Count(
+                Case(When(points=3, then=1), output_field=IntegerField())
+            ),
         )
     )
     by_username = {row["username"]: row for row in pronostics_data}
@@ -291,13 +300,27 @@ def get_ranking(request, room_id):
         key=lambda r: (-r["total"], -r["exact_result"], -r["partial_result"])
     )
     ranking = [{"position": idx + 1, **item} for idx, item in enumerate(merged)]
-    data = {
-        "pronostics_ranking": ranking,
-        "room_name": room.name,
-        "tournament": room.tournament.name,
-        "grand_prize": room.grand_prize,
-    }
-    return render(request, "tournaments/pronostics_ranking.html", data)
+    return _ranking_response(request, room, ranking)
+
+
+@login_required(login_url="account_login")
+def get_ranking_v2(request, room_id):
+    if not request.user.tournaments_rooms.filter(id=room_id).exists():
+        return JsonResponse({"error_404": "No corresponde el room con el usuario"})
+
+    room = Room.objects.select_related("tournament").filter(id=room_id).first()
+    if room is None:
+        return JsonResponse({"error_404": "Sala no encontrada"}, status=404)
+
+    ranking = build_room_ranking_v2(room)
+    return _ranking_response(request, room, ranking)
+
+
+@login_required(login_url="account_login")
+def get_ranking(request, room_id):
+    if settings.RANKING_VERSION == 2:
+        return get_ranking_v2(request, room_id)
+    return get_ranking_v1(request, room_id)
 
 
 @login_required(login_url="account_login")

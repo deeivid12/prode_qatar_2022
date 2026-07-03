@@ -237,6 +237,9 @@ WORLD_CUP_TOURNAMENT_NAME = env("WORLD_CUP_TOURNAMENT_NAME", default="Mundial 20
 # 1 = check_pronostics_results, 2 = check_pronostics_results_v2 (optimizada)
 PRONOSTICS_CHECK_VERSION = env.int("PRONOSTICS_CHECK_VERSION", default=2)
 
+# 1 = get_ranking v1, 2 = build_room_ranking_v2 (optimizada)
+RANKING_VERSION = env.int("RANKING_VERSION", default=2)
+
 # football-data.org
 FOOTBALL_DATA_API_BASE_URL = env(
     "FOOTBALL_DATA_API_BASE_URL",
